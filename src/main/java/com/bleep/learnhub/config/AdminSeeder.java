@@ -25,7 +25,7 @@ public class AdminSeeder implements CommandLineRunner {
 
         User admin = User.builder()
                 .username("admin")
-                .email("admin@bleep.com")
+                .email("adminbleepdemo@yopmail.com")
                 .passwordHash(passwordEncoder.encode("Admin@123"))
                 .role(Role.SUPER_ADMIN)
                 .status(AccountStatus.ACTIVE) // Corrected from Status.ACTIVE to AccountStatus.ACTIVE to match the project schema
