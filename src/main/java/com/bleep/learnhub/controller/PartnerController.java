@@ -1,5 +1,7 @@
 package com.bleep.learnhub.controller;
 
+import com.bleep.learnhub.dto.response.ApiResponse;
+import com.bleep.learnhub.dto.response.PartnerProfileResponseDto;
 import com.bleep.learnhub.service.PartnerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +19,16 @@ public class PartnerController {
 
     // Partner fetches their own business profile
     @GetMapping("/profile")
-    public ResponseEntity<?> getMyProfile(Authentication authentication) {
+    public ResponseEntity<ApiResponse<PartnerProfileResponseDto>> getMyProfile(Authentication authentication) {
         String partnerUsername = authentication.getName();
-        return ResponseEntity.ok(partnerService.getPartnerProfile(partnerUsername));
+        PartnerProfileResponseDto profile = partnerService.getPartnerProfile(partnerUsername);
+        return ResponseEntity.ok(ApiResponse.success(profile, "Profile retrieved successfully."));
     }
 
     // Example of a future endpoint: Partner fetches courses allocated by their Vendor
     @GetMapping("/courses")
-    public ResponseEntity<?> getAllocatedCourses(Authentication authentication) {
+    public ResponseEntity<ApiResponse<String>> getAllocatedCourses(Authentication authentication) {
         String partnerUsername = authentication.getName();
-        // return ResponseEntity.ok(partnerService.getAllocatedCourses(partnerUsername));
-        return ResponseEntity.ok("Course list will be returned here.");
+        return ResponseEntity.ok(ApiResponse.success("Course list will be returned here.", "Courses retrieved successfully."));
     }
 }

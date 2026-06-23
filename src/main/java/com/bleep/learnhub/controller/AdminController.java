@@ -1,6 +1,7 @@
 package com.bleep.learnhub.controller;
 
 import com.bleep.learnhub.dto.request.VendorCreateDto;
+import com.bleep.learnhub.dto.response.ApiResponse;
 import com.bleep.learnhub.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,15 @@ public class AdminController {
 
     // Creates a new vendor in PENDING_SETUP state
     @PostMapping("/vendors")
-    public ResponseEntity<String> createVendor(@RequestBody VendorCreateDto dto) {
+    public ResponseEntity<ApiResponse<Void>> createVendor(@RequestBody VendorCreateDto dto) {
         adminService.createVendor(dto.getUsername(), dto.getEmail(), dto.getCompanyName());
-        return ResponseEntity.ok("Vendor created successfully. Welcome email sent.");
+        return ResponseEntity.ok(ApiResponse.success("Vendor created successfully. Welcome email sent."));
     }
 
     // Blocks a vendor from accessing the system (disables account)
     @PutMapping("/vendors/{vendorId}/block")
-    public ResponseEntity<String> blockVendor(@PathVariable String vendorId) {
+    public ResponseEntity<ApiResponse<Void>> blockVendor(@PathVariable String vendorId) {
         adminService.changeVendorStatus(vendorId, "BLOCKED");
-        return ResponseEntity.ok("Vendor blocked successfully.");
+        return ResponseEntity.ok(ApiResponse.success("Vendor blocked successfully."));
     }
 }
