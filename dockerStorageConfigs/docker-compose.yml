@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: bleep-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: learnhub_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./volume-data/postgres:/var/lib/postgresql/data
+    networks:
+      - bleep-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: bleep-redis
+    restart: always
+    command: redis-server --requirepass yourredispassword
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./volume-data/redis:/data
+    networks:
+      - bleep-network
+networks:
+  bleep-network:
+    driver: bridge
+
+
+    
+
+# --- COMMANDS CHEAT SHEET ---
+# Start:              docker-compose up -d
+# View Status:        docker-compose ps
+# Stop & Remove:      docker-compose down
+# Delete Volume:      docker-compose down -v
+# Delete Images:      docker rmi postgres:16-alpine redis:7-alpine
+# Full Cleanup:       docker-compose down -v && docker rmi postgres:16-alpine redis:7-alpine
+# ----------------------------
