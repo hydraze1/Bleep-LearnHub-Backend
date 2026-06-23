@@ -32,7 +32,9 @@ networks:
     driver: bridge
 
 
-    
+    # sudo systemctl start docker
+    # sudo systemctl stop docker
+    # sudo systemctl status docker
 
 # --- COMMANDS CHEAT SHEET ---
 # Start:              docker-compose up -d
