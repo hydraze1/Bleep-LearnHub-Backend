@@ -27,7 +27,7 @@ public class EmailService {
             message.setSubject("Welcome to Bleep LearnHub!");
             message.setText("Hello,\n\nYour " + role + " account has been created. " +
                     "Your username is: " + username + "\n\n" +
-                    "Please log in to set up your password.");
+                    "Please use the app to send yourself an OTP and set up your password.");
             mailSender.send(message);
             log.info("Welcome email sent successfully to {}", to);
         } catch (Exception e) {
@@ -42,12 +42,28 @@ public class EmailService {
             message.setFrom(fromEmail);
             message.setTo(to);
             message.setSubject("Your Bleep LearnHub OTP");
-            message.setText("Your One-Time Password for account setup is: " + otp + 
-                    "\n\nThis OTP will expire in 5 minutes. Do not share this with anyone.");
+            message.setText("Your One-Time Password is: " + otp +
+                    "\n\nThis OTP will expire in 30 minutes. Do not share it with anyone.");
             mailSender.send(message);
             log.info("OTP email sent successfully to {}", to);
         } catch (Exception e) {
             log.error("Failed to send OTP email to {}: {}", to, e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendForgotUsernameEmail(String to, String username) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(to);
+            message.setSubject("Your Bleep LearnHub Username");
+            message.setText("Hello,\n\nYour username for Bleep LearnHub is: " + username +
+                    "\n\nIf you did not request this, please ignore this email.");
+            mailSender.send(message);
+            log.info("Forgot-username email sent successfully to {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send forgot-username email to {}: {}", to, e.getMessage());
         }
     }
 }

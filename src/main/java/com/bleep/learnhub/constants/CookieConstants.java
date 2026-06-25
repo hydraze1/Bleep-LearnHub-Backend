@@ -4,13 +4,16 @@ public final class CookieConstants {
 
     private CookieConstants() {}
 
-    public static final String ACCESS_TOKEN = "access_token";
-    public static final long ACCESS_TOKEN_AGE = 86400;
+    /** Cookie name that holds the Redis session key after login. */
+    public static final String SESSION_ID = "session_id";
 
-    public static final String REFRESH_TOKEN = "refresh_token";
-    public static final long REFRESH_TOKEN_AGE = 604800;
+    /** Max-age for the session cookie: 7 days in seconds. */
+    public static final long SESSION_AGE = 604800L;
 
+    /** Cookie name that holds the Redis OTP-session key during password setup/reset. */
     public static final String OTP_SESSION = "otp_session";
-    public static final long OTP_SESSION_AGE = 300;
+
+    /** Max-age for the OTP session cookie: 30 minutes in seconds. */
+    public static final long OTP_SESSION_AGE = 1800L;
 
 }

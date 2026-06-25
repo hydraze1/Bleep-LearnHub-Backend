@@ -25,4 +25,8 @@ public interface UserSessionRepository extends JpaRepository<UserSession, UUID> 
     @Modifying
     @Query("UPDATE UserSession s SET s.isActive = false, s.logoutAt = CURRENT_TIMESTAMP WHERE s.user.id = :userId AND s.isActive = true")
     void invalidateAllSessionsForUser(@Param("userId") UUID userId);
+
+    @Modifying
+    @Query("DELETE FROM UserSession s WHERE s.user.id = :userId")
+    void deleteByUserId(@Param("userId") UUID userId);
 }

@@ -15,4 +15,8 @@ public class VendorCreateDto {
 
     @NotBlank(message = "Company name is required")
     private String companyName;
+
+    private String phone;
+
+    private String description;
 }

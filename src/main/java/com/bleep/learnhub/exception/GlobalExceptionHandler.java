@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -66,7 +68,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
-    // --- 5. Handle Role/Permission Denials (403) ---
+    // --- 5. Handle Disabled Account (PENDING_SETUP tries to login) ---
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDisabledException(
+            DisabledException ex, HttpServletRequest request) {
+        
+        ApiResponse<Void> response = ApiResponse.failure(
+                "Account setup is not complete. Please use 'send-otp' to set your password first.",
+                "ACCOUNT_NOT_ACTIVE");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    // --- 6. Handle Locked Account (BLOCKED user tries to login) ---
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleLockedException(
+            LockedException ex, HttpServletRequest request) {
+        
+        ApiResponse<Void> response = ApiResponse.failure(
+                "Your account has been blocked. Please contact support.",
+                "ACCOUNT_BLOCKED");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    // --- 7. Handle Role/Permission Denials (403) ---
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(
             AccessDeniedException ex, HttpServletRequest request) {
@@ -75,7 +99,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
-    // --- 6. Fallback for all other unexpected errors (500) ---
+    // --- 8. Fallback for all other unexpected errors (500) ---
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleAllOtherExceptions(
             Exception ex, HttpServletRequest request) {

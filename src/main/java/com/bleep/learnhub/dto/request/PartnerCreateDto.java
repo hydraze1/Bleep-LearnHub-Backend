@@ -17,5 +17,9 @@ public class PartnerCreateDto {
     private String companyName;
 
     // Phone is optional based on your schema, so no @NotBlank
-    private String phone; 
+    private String phone;
+
+    private String description;
+
+    private String vendorId;
 }
