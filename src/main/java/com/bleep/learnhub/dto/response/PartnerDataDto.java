@@ -23,4 +23,5 @@ public class PartnerDataDto {
     /** ID of the parent Vendor this partner belongs to. */
     private String vendorId;
     private String createdAt;
+    private DeviceDetailsDto deviceDetails;
 }

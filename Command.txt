@@ -2,5 +2,26 @@ mvn spring-boot:run
 
 
 
-Swagger UI: http://localhost:8080/swagger-ui/index.html
-OpenAPI Specs (JSON): http://localhost:8080/v3/api-docs
+Swagger UI: http://localhost:8080/bleep-learnhub-backend/api/v1/swagger-ui/index.html
+OpenAPI Specs (JSON): http://localhost:8080/bleep-learnhub-backend/api/v1/v3/api-docs
+
+
+https://docmedhos.develeganceinnovatech.in/adtApi/swagger-ui/index.html#/Admission/admitPatient
+
+hydraze1@hydraze1-Nitro:~/Desktop/code/github/ADT-UI/src/hooks$ ls
+
+AdtApi  ApiUrls.ts  CSNOserv  CredentialApi  DrugApi  Icd10Api  LabApi  MasterApi  OrderApi  PatientApi
+
+hydraze1@hydraze1-Nitro:~/Desktop/code/github/ADT-UI/src/hooks$ cd AdtApi/
+
+hydraze1@hydraze1-Nitro:~/Desktop/code/github/ADT-UI/src/hooks/AdtApi$ ls
+
+adt.type.ts  hooks
+
+hydraze1@hydraze1-Nitro:~/Desktop/code/github/ADT-UI/src/hooks/AdtApi$ cd hooks/
+
+hydraze1@hydraze1-Nitro:~/Desktop/code/github/ADT-UI/src/hooks/AdtApi/hooks$ ls
+
+Admission.hook.ts  Dashboard.hook.ts  DeathCase.hook.ts  Discharge.hook.ts  Examination.hook.ts  Transfer.hook.ts  Treatment.hook.ts
+
+hydraze1@hydraze1-Nitro:~/Desktop/code/github/ADT-UI/src/hooks/AdtApi/hooks$ 

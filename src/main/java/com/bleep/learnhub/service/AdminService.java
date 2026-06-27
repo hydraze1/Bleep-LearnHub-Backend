@@ -38,6 +38,7 @@ public class AdminService {
 
         Vendor vendor = Vendor.builder()
                 .user(user)
+                .email(email)
                 .companyName(companyName)
                 .isActive(true)
                 .build();

@@ -26,6 +26,9 @@ public class Vendor {
     @EqualsAndHashCode.Exclude
     private User user;
 
+    @Column(length = 255)
+    private String email;
+
     @Column(name = "company_name", nullable = false, length = 255)
     private String companyName;
 

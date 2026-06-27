@@ -25,4 +25,5 @@ public class UserDataDto {
     private String lastLoginAt;
     private String createdAt;
     private String updatedAt;
+    private DeviceDetailsDto deviceDetails;
 }

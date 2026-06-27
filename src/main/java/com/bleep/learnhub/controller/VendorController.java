@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/vendors")
+@RequestMapping("/vendors")
 @RequiredArgsConstructor
 // Ensures only Super Admins can access any Vendor management API
 @PreAuthorize("hasAuthority('SUPER_ADMIN')")

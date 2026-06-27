@@ -32,6 +32,9 @@ public class Partner {
     @EqualsAndHashCode.Exclude
     private Vendor vendor;
 
+    @Column(length = 255)
+    private String email;
+
     @Column(name = "company_name", nullable = false, length = 255)
     private String companyName;
 

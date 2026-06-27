@@ -38,6 +38,17 @@ public class UserSession {
     @Column(name = "device_type")
     private String deviceType;
 
+    private String device;
+
+    @Column(name = "device_model")
+    private String deviceModel;
+
+    @Column(name = "os_version")
+    private String osVersion;
+
+    @Column(name = "client_version")
+    private String clientVersion;
+
     @CreationTimestamp
     @Column(name = "login_at", updatable = false)
     private LocalDateTime loginAt;

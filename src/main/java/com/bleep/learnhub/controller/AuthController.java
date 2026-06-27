@@ -6,13 +6,16 @@ import com.bleep.learnhub.dto.request.LoginRequestDto;
 import com.bleep.learnhub.dto.request.SendOtpRequestDto;
 import com.bleep.learnhub.dto.request.SetPasswordRequestDto;
 import com.bleep.learnhub.dto.response.ApiResponse;
+import com.bleep.learnhub.dto.response.DeviceDetailsDto;
 import com.bleep.learnhub.dto.response.LoginResponseDto;
+import com.bleep.learnhub.dto.response.UserDataDto;
 import com.bleep.learnhub.security.CookieService;
 import com.bleep.learnhub.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -35,7 +38,7 @@ import org.springframework.web.bind.annotation.*;
  * </pre>
  */
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -64,16 +67,24 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponseDto>> login(
             @Valid @RequestBody LoginRequestDto request,
-            @RequestHeader(value = "X-Device-Type",  defaultValue = "") String deviceType,
-            @RequestHeader(value = "X-Device-Ip",    defaultValue = "") String deviceIp,
-            @RequestHeader(value = "X-Browser-Type", defaultValue = "") String browserType,
             HttpServletRequest servletRequest,
             HttpServletResponse servletResponse) {
 
-        // Fall back to the actual remote address if the caller did not send X-Device-Ip
-        String resolvedIp = deviceIp.isBlank() ? servletRequest.getRemoteAddr() : deviceIp;
+        String deviceIp = servletRequest.getHeader("Device-Ip");
+        String resolvedIp = (deviceIp == null || deviceIp.isBlank()) ? servletRequest.getRemoteAddr() : deviceIp;
 
-        AuthService.LoginResult result = authService.login(request, deviceType, resolvedIp, browserType);
+        DeviceDetailsDto deviceDetails = DeviceDetailsDto.builder()
+                .deviceIp(resolvedIp)
+                .deviceType(servletRequest.getHeader("Device-Type"))
+                .device(servletRequest.getHeader("Device"))
+                .deviceModel(servletRequest.getHeader("Device-Model"))
+                .osName(servletRequest.getHeader("OS-Name"))
+                .osVersion(servletRequest.getHeader("OS-Version"))
+                .clientName(servletRequest.getHeader("Client-Name"))
+                .clientVersion(servletRequest.getHeader("Client-Version"))
+                .build();
+
+        AuthService.LoginResult result = authService.login(request, deviceDetails);
 
         // Set the session cookie on the response (HttpOnly + Secure + SameSite=Strict)
         ResponseCookie sessionCookie = cookieService.createCookie(
@@ -204,6 +215,17 @@ public class AuthController {
 
         return ResponseEntity.ok(ApiResponse.success(
                 "If this email is registered, your username has been sent to it."));
+    }
+
+    // ── 7. Get User List ──────────────────────────────────────────────────────────
+
+    /**
+     * Provides a list of all users in the users table without requiring authentication.
+     */
+    @GetMapping({"/users", "/user-list"})
+    public ResponseEntity<ApiResponse<List<UserDataDto>>> getUserList() {
+        List<UserDataDto> users = authService.getAllUsers();
+        return ResponseEntity.ok(ApiResponse.success(users, "Users list retrieved successfully."));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────────

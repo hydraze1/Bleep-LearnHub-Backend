@@ -2,6 +2,7 @@ package com.bleep.learnhub.service;
 
 import com.bleep.learnhub.dto.OtpSessionData;
 import com.bleep.learnhub.dto.request.LoginRequestDto;
+import com.bleep.learnhub.dto.response.DeviceDetailsDto;
 import com.bleep.learnhub.dto.response.LoginResponseDto;
 import com.bleep.learnhub.dto.response.PartnerDataDto;
 import com.bleep.learnhub.dto.response.UserDataDto;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -63,10 +65,7 @@ public class AuthService {
      * @param browserType Optional — e.g. "Chrome/124".
      */
     @Transactional
-    public LoginResult login(LoginRequestDto request,
-                             String deviceType,
-                             String deviceIp,
-                             String browserType) {
+    public LoginResult login(LoginRequestDto request, DeviceDetailsDto deviceDetails) {
 
         // 1. Authenticate — throws BadCredentialsException, DisabledException, LockedException
         //    which are all handled by GlobalExceptionHandler.
@@ -83,7 +82,7 @@ public class AuthService {
         }
 
         // 3. Build the composite response DTO
-        LoginResponseDto responseDto = buildLoginResponseDto(user);
+        LoginResponseDto responseDto = buildLoginResponseDto(user, deviceDetails);
 
         // 4. Generate session ID and persist in Redis (TTL = 7 days)
         String sessionId = UUID.randomUUID().toString();
@@ -93,9 +92,14 @@ public class AuthService {
         UserSession sessionRecord = UserSession.builder()
                 .user(user)
                 .sessionId(sessionId)
-                .deviceType(deviceType)
-                .ipAddress(deviceIp)
-                .browser(browserType)
+                .deviceType(deviceDetails.getDeviceType())
+                .ipAddress(deviceDetails.getDeviceIp())
+                .browser(deviceDetails.getClientName())
+                .os(deviceDetails.getOsName())
+                .device(deviceDetails.getDevice())
+                .deviceModel(deviceDetails.getDeviceModel())
+                .osVersion(deviceDetails.getOsVersion())
+                .clientVersion(deviceDetails.getClientVersion())
                 .isActive(true)
                 .build();
         userSessionRepository.save(sessionRecord);
@@ -237,14 +241,28 @@ public class AuthService {
                 .ifPresent(user -> emailService.sendForgotUsernameEmail(user.getEmail(), user.getUsername()));
     }
 
+    // ── Get User List ────────────────────────────────────────────────────────────
+
+    /**
+     * Retrieves all users in the user table, mapped to UserDataDto.
+     *
+     * @return List of UserDataDto.
+     */
+    public List<UserDataDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::mapUserToDto)
+                .toList();
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────────
 
     /**
      * Builds the composite {@link LoginResponseDto} for a user, loading the Vendor
      * or Partner profile rows based on the user's role.
      */
-    private LoginResponseDto buildLoginResponseDto(User user) {
+    private LoginResponseDto buildLoginResponseDto(User user, DeviceDetailsDto deviceDetails) {
         UserDataDto userDto = mapUserToDto(user);
+        userDto.setDeviceDetails(deviceDetails);
         VendorDataDto vendorDto = null;
         PartnerDataDto partnerDto = null;
 
@@ -252,13 +270,16 @@ public class AuthService {
             Vendor vendor = vendorRepository.findByUserUsername(user.getUsername()).orElse(null);
             if (vendor != null) {
                 vendorDto = mapVendorToDto(vendor);
+                vendorDto.setDeviceDetails(deviceDetails);
             }
         } else if (user.getRole() == Role.PARTNER) {
             Partner partner = partnerRepository.findByUserUsername(user.getUsername()).orElse(null);
             if (partner != null) {
                 partnerDto = mapPartnerToDto(partner);
+                partnerDto.setDeviceDetails(deviceDetails);
                 // Also include the parent vendor so the frontend has full context
                 vendorDto = mapVendorToDto(partner.getVendor());
+                vendorDto.setDeviceDetails(deviceDetails);
             }
         }
 

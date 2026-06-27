@@ -21,4 +21,5 @@ public class VendorDataDto {
     private String description;
     private boolean active;
     private String createdAt;
+    private DeviceDetailsDto deviceDetails;
 }
