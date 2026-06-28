@@ -29,7 +29,7 @@ public class AdminSeeder implements CommandLineRunner {
                 .passwordHash(passwordEncoder.encode("Admin@123"))
                 .role(Role.SUPER_ADMIN)
                 .status(AccountStatus.ACTIVE) // Corrected from Status.ACTIVE to AccountStatus.ACTIVE to match the project schema
-                .build();
+                .build(); 
 
         userRepository.save(admin);
     }
