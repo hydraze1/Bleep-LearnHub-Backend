@@ -15,9 +15,9 @@ public class CookieService {
         ResponseCookie.ResponseCookieBuilder builder =
                 ResponseCookie.from(cookieName, value)
                         .httpOnly(true)
-                        .secure(true)
+                        .secure(false)   // set to true when using HTTPS in production
                         .path("/")
-                        .sameSite("Strict");
+                        .sameSite("Lax"); // Lax allows cross-origin requests with cookies
 
         if (maxAgeSeconds != null) {
             builder.maxAge(maxAgeSeconds);
@@ -30,9 +30,9 @@ public class CookieService {
 
         return ResponseCookie.from(cookieName, "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)   // match the createCookie setting
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .maxAge(0)
                 .build();
     }

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         Bleep LearnHub Backend — Logback Rolling File Configuration
+         Console pattern is controlled by application.properties.
+         This file adds the rolling file appender only.
+         ═══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Include Spring Boot defaults (console appender, base levels) -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- Log directory (relative to the working directory) -->
+    <property name="LOGS" value="./logs" />
+
+    <!--
+        Pattern: timestamp  [thread]  [TraceID: correlationId]  LEVEL  logger  - message
+        %X{correlationId:-} reads from MDC — shows "-" if no correlationId is set
+        (e.g., health checks that bypass the RequestTraceFilter).
+    -->
+    <property name="LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [TraceID: %X{correlationId:-}] %logger{36} - %msg%n" />
+
+    <!-- ── Console Appender ────────────────────────────────────────────── -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>${LOG_PATTERN}</Pattern>
+        </layout>
+    </appender>
+
+    <!-- ── Rolling File Appender ──────────────────────────────────────── -->
+    <!--
+        Creates a new archive daily OR when the file hits 10 MB.
+        Active file : ./logs/application.log
+        Archives    : ./logs/archived/app-YYYY-MM-DD.0.log
+        Keeps 30 days / max 1 GB total.
+    -->
+    <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/application.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>${LOG_PATTERN}</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/app-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- ── Per-package log levels ─────────────────────────────────────── -->
+
+    <!-- Suppress framework noise -->
+    <logger name="org.springframework"           level="warn" />
+    <logger name="org.hibernate"                 level="warn" />
+    <logger name="org.springframework.security"  level="warn" />
+    <logger name="io.lettuce"                    level="warn" />
+    <logger name="com.sun.mail"                  level="warn" />
+    <logger name="org.springframework.mail"      level="warn" />
+
+    <!-- Your application — INFO = normal production level
+         Change to DEBUG to also see detailed debug messages -->
+    <logger name="com.bleep.learnhub"            level="info" />
+
+    <!-- ── Root ───────────────────────────────────────────────────────── -->
+    <root level="info">
+        <appender-ref ref="Console" />
+        <appender-ref ref="RollingFile" />
+    </root>
+
+</configuration>

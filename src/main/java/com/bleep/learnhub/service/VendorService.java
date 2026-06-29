@@ -16,6 +16,7 @@ import com.bleep.learnhub.repository.UserRepository;
 import com.bleep.learnhub.repository.UserSessionRepository;
 import com.bleep.learnhub.repository.VendorRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VendorService {
@@ -38,7 +40,9 @@ public class VendorService {
 
     @Transactional
     public void createVendor(VendorCreateDto dto) {
+        log.info("VendorService: Creating vendor — username='{}', email='{}'", dto.getUsername(), dto.getEmail());
         if (userRepository.existsByUsername(dto.getUsername()) || userRepository.existsByEmail(dto.getEmail())) {
+            log.warn("VendorService: Duplicate username or email — username='{}'", dto.getUsername());
             throw new RuntimeException("Username or Email already exists");
         }
 
@@ -61,24 +65,33 @@ public class VendorService {
         vendorRepository.save(vendor);
 
         emailService.sendWelcomeEmail(dto.getEmail(), dto.getUsername(), "Vendor");
+        log.info("VendorService: Vendor created successfully — username='{}'", dto.getUsername());
     }
 
     @Transactional(readOnly = true)
     public List<VendorProfileResponseDto> getAllVendors() {
-        return vendorRepository.findAll().stream()
+        log.info("VendorService: Fetching all vendors");
+        List<VendorProfileResponseDto> result = vendorRepository.findAll().stream()
                 .map(this::mapToProfileResponseDto)
                 .collect(Collectors.toList());
+        log.info("VendorService: Returned {} vendors", result.size());
+        return result;
     }
 
     @Transactional(readOnly = true)
     public VendorProfileResponseDto getVendorById(UUID id) {
+        log.info("VendorService: Fetching vendor by id='{}'", id);
         Vendor vendor = vendorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vendor not found with ID: " + id));
+                .orElseThrow(() -> {
+                    log.warn("VendorService: Vendor not found — id='{}'", id);
+                    return new RuntimeException("Vendor not found with ID: " + id);
+                });
         return mapToProfileResponseDto(vendor);
     }
 
     @Transactional
     public void updateVendor(UUID id, VendorUpdateDto dto) {
+        log.info("VendorService: Updating vendor id='{}'", id);
         Vendor vendor = vendorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vendor not found with ID: " + id));
 
@@ -103,10 +116,12 @@ public class VendorService {
         }
 
         vendorRepository.save(vendor);
+        log.info("VendorService: Vendor updated successfully — id='{}'", id);
     }
 
     @Transactional
     public void deleteVendor(UUID id) {
+        log.info("VendorService: Deleting vendor id='{}'", id);
         Vendor vendor = vendorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vendor not found with ID: " + id));
         User vendorUser = vendor.getUser();
@@ -126,6 +141,7 @@ public class VendorService {
         userSessionRepository.deleteByUserId(vendorUser.getId());
         vendorRepository.delete(vendor);
         userRepository.delete(vendorUser);
+        log.info("VendorService: Vendor and all partners deleted — id='{}'", id);
     }
 
     // ── Vendor Actions ───────────────────────────────────────────────────────────

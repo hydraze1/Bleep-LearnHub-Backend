@@ -1,5 +1,17 @@
 mvn spring-boot:run
 
+    # sudo systemctl start docker
+    # sudo systemctl stop docker
+    # sudo systemctl status docker
+
+# --- COMMANDS CHEAT SHEET ---
+# Start:              docker-compose up -d
+# View Status:        docker-compose ps
+# Stop & Remove:      docker-compose down
+# Delete Volume:      docker-compose down -v
+# Delete Images:      docker rmi postgres:16-alpine redis:7-alpine
+# Full Cleanup:       docker-compose down -v && docker rmi postgres:16-alpine redis:7-alpine
+
 
 
 Swagger UI: http://localhost:8080/bleep-learnhub-backend/api/v1/swagger-ui/index.html

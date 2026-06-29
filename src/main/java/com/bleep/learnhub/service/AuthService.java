@@ -20,6 +20,7 @@ import com.bleep.learnhub.repository.UserRepository;
 import com.bleep.learnhub.repository.UserSessionRepository;
 import com.bleep.learnhub.repository.VendorRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -66,12 +68,14 @@ public class AuthService {
      */
     @Transactional
     public LoginResult login(LoginRequestDto request, DeviceDetailsDto deviceDetails) {
+        log.info("AuthService: Login attempt — username='{}'", request.getUsername());
 
         // 1. Authenticate — throws BadCredentialsException, DisabledException, LockedException
         //    which are all handled by GlobalExceptionHandler.
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
+        log.info("AuthService: Credentials verified for username='{}'", request.getUsername());
 
         // 2. Re-fetch the User entity (authentication passed, so we know it exists)
         User user = userRepository.findByUsername(request.getUsername())
@@ -108,6 +112,8 @@ public class AuthService {
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
 
+        log.info("AuthService: Login successful — username='{}', role='{}', sessionId='{}'...",
+                user.getUsername(), user.getRole(), sessionId.substring(0, 8));
         return new LoginResult(sessionId, responseDto);
     }
 
@@ -132,6 +138,7 @@ public class AuthService {
      */
     @Transactional
     public void logout(String sessionId) {
+        log.info("AuthService: Logout — invalidating session");
         // Remove from Redis — the next request with this cookie will be rejected
         redisService.deleteSession(sessionId);
 
@@ -141,6 +148,7 @@ public class AuthService {
             session.setLogoutAt(LocalDateTime.now());
             userSessionRepository.save(session);
         });
+        log.info("AuthService: Session invalidated successfully");
     }
 
     // ── Send OTP ─────────────────────────────────────────────────────────────────
@@ -154,6 +162,7 @@ public class AuthService {
      * @return The OTP session token (to be set as the {@code otp_session} cookie).
      */
     public String sendOtp(String usernameOrEmail) {
+        log.info("AuthService: OTP requested for '{}'", usernameOrEmail);
         // Resolve by username first, fall back to email
         User user = userRepository.findByUsername(usernameOrEmail)
                 .or(() -> userRepository.findByEmail(usernameOrEmail))
@@ -186,7 +195,7 @@ public class AuthService {
 
         // Send OTP by email (async — will not block the response)
         emailService.sendOtpEmail(user.getEmail(), otp);
-
+        log.info("AuthService: OTP generated and email dispatched — username='{}'", user.getUsername());
         return otpToken;
     }
 
@@ -203,6 +212,7 @@ public class AuthService {
      */
     @Transactional
     public void setPassword(String otpToken, String otp, String newPassword) {
+        log.info("AuthService: Password set/reset attempt");
         // Fetch OTP session data from Redis
         OtpSessionData otpData = redisService.getOtpSession(otpToken);
         if (otpData == null) {
@@ -226,6 +236,7 @@ public class AuthService {
 
         // Delete OTP session so it cannot be reused
         redisService.deleteOtpSession(otpToken);
+        log.info("AuthService: Password updated and account activated — username='{}'", user.getUsername());
     }
 
     // ── Forgot Username ──────────────────────────────────────────────────────────
