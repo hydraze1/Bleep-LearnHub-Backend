@@ -41,6 +41,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String requestUri = request.getRequestURI();
+        log.info("********************************************************************************************************************************");
+        log.info("********************************************************************************************************************************");
+        log.info("********************************************************************************************************************************");
+
         log.info("🛡️ [Auth Filter] Intercepted Request for URI: {}", requestUri);
 
         // 1. Extract the session_id cookie
