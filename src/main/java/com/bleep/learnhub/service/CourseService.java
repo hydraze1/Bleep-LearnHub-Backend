@@ -51,7 +51,7 @@ public class CourseService {
         
         long batchCount = batchRepository.countByCourseId(id);
         if (batchCount > 0) {
-            throw new BusinessException("Cannot delete course with existing batches. Delete batches first.", "COURSE_HAS_BATCHES");
+            throw new BusinessException("Cannot delete course with existing batches. Delete batches first.");
         }
         
         courseRepository.delete(course);

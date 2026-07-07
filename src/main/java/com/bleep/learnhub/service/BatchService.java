@@ -60,7 +60,7 @@ public class BatchService {
 
         long sessionCount = sessionRepository.countByBatchId(id);
         if (sessionCount > 0) {
-            throw new BusinessException("Cannot delete batch with existing sessions. Delete sessions first.", "BATCH_HAS_SESSIONS");
+            throw new BusinessException("Cannot delete batch with existing sessions. Delete sessions first.");
         }
 
         batchRepository.delete(batch);
