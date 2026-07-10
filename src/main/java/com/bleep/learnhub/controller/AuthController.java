@@ -106,14 +106,14 @@ public class AuthController {
 
         if (sessionId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.failure("No active session found. Please log in.", "NO_SESSION"));
+                    .body(ApiResponse.failure("No active session found. Please log in.", "401", "NO_SESSION"));
         }
 
         LoginResponseDto data = authService.getSession(sessionId);
 
         if (data == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.failure("Session has expired. Please log in again.", "SESSION_EXPIRED"));
+                    .body(ApiResponse.failure("Session has expired. Please log in again.", "401", "SESSION_EXPIRED"));
         }
 
         return ResponseEntity.ok(ApiResponse.success(data, "Session is active."));
@@ -187,6 +187,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.failure(
                             "OTP session not found. Please use 'send-otp' to request a new OTP.",
+                            "400",
                             "OTP_SESSION_MISSING"));
         }
 

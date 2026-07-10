@@ -26,5 +26,6 @@ public class BatchCreateDto {
     private LocalDate scheduledDate;
 
     @NotNull(message = "Scheduled Time is required")
-    private LocalTime scheduledTime;
+    @jakarta.validation.constraints.Pattern(regexp = "^(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d$", message = "wrong format need in 24hr format time")
+    private String scheduledTime;
 }

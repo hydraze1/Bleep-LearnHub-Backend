@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
                 .message("Validation Failed")
-                .error("Validation Error")
+                .error("400")
                 .errorCode("VALIDATION_ERROR")
                 .data(validationErrors)
                 .build();
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(
             ResourceNotFoundException ex, HttpServletRequest request) {
         
-        ApiResponse<Void> response = ApiResponse.failure(ex.getMessage(), "RESOURCE_NOT_FOUND");
+        ApiResponse<Void> response = ApiResponse.failure(ex.getMessage(), "404", "RESOURCE_NOT_FOUND");
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(
             BusinessException ex, HttpServletRequest request) {
         
-        ApiResponse<Void> response = ApiResponse.failure(ex.getMessage(), "BUSINESS_RULE_VIOLATION");
+        ApiResponse<Void> response = ApiResponse.failure(ex.getMessage(), "400", "BUSINESS_RULE_VIOLATION");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleBadCredentials(
             BadCredentialsException ex, HttpServletRequest request) {
         
-        ApiResponse<Void> response = ApiResponse.failure("Invalid username or password", "BAD_CREDENTIALS");
+        ApiResponse<Void> response = ApiResponse.failure("Invalid username or password", "401", "BAD_CREDENTIALS");
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
@@ -75,6 +75,7 @@ public class GlobalExceptionHandler {
         
         ApiResponse<Void> response = ApiResponse.failure(
                 "Account setup is not complete. Please use 'send-otp' to set your password first.",
+                "403",
                 "ACCOUNT_NOT_ACTIVE");
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
@@ -86,6 +87,7 @@ public class GlobalExceptionHandler {
         
         ApiResponse<Void> response = ApiResponse.failure(
                 "Your account has been blocked. Please contact support.",
+                "403",
                 "ACCOUNT_BLOCKED");
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
@@ -95,7 +97,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(
             AccessDeniedException ex, HttpServletRequest request) {
         
-        ApiResponse<Void> response = ApiResponse.failure("You do not have permission to access this resource", "ACCESS_DENIED");
+        ApiResponse<Void> response = ApiResponse.failure("You do not have permission to access this resource", "403", "ACCESS_DENIED");
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
@@ -107,7 +109,7 @@ public class GlobalExceptionHandler {
         // Log the actual error so the developer can fix it, but hide the stack trace from the user
         log.error("Unhandled exception caught: ", ex);
 
-        ApiResponse<Void> response = ApiResponse.failure("An unexpected internal server error occurred", "INTERNAL_SERVER_ERROR");
+        ApiResponse<Void> response = ApiResponse.failure("An unexpected internal server error occurred", "500", "INTERNAL_SERVER_ERROR");
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

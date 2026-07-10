@@ -44,7 +44,7 @@ public class SessionService {
                 .resourceLink(dto.getResourceLink())
                 .sequenceOrder(dto.getSequenceOrder())
                 .scheduledDate(dto.getScheduledDate())
-                .scheduledTime(dto.getScheduledTime())
+                .scheduledTime(dto.getScheduledTime() != null ? java.time.LocalTime.parse(dto.getScheduledTime()) : null)
                 .build();
 
         session = sessionRepository.save(session);
@@ -63,7 +63,7 @@ public class SessionService {
         session.setResourceLink(dto.getResourceLink());
         session.setSequenceOrder(dto.getSequenceOrder());
         session.setScheduledDate(dto.getScheduledDate());
-        session.setScheduledTime(dto.getScheduledTime());
+        session.setScheduledTime(dto.getScheduledTime() != null ? java.time.LocalTime.parse(dto.getScheduledTime()) : null);
 
         sessionRepository.save(session);
     }

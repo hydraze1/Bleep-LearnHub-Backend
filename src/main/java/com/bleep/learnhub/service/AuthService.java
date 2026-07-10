@@ -46,6 +46,12 @@ public class AuthService {
     private final EmailService emailService;
     private final RedisService redisService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.otp.max-requests}")
+    private int otpMaxRequests;
+
+    @org.springframework.beans.factory.annotation.Value("${app.otp.time-frame-minutes}")
+    private int otpTimeFrameMinutes;
+
     // ── Result record for login (sessionId + payload) ────────────────────────────
 
     /**
@@ -169,11 +175,11 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No account found with this username or email"));
 
-        // Rate-limit check (max 3 OTPs per 30-minute window per user)
+        // Rate-limit check (max requests per time-frame window per user)
         int currentCount = redisService.getOtpCount(user.getUsername());
-        if (currentCount >= 3) {
+        if (currentCount >= otpMaxRequests) {
             throw new BusinessException(
-                    "OTP limit reached. You can only request 3 OTPs every 30 minutes. Please try again later.");
+                    "OTP limit reached. You can only request " + otpMaxRequests + " OTPs every " + otpTimeFrameMinutes + " minutes. Please try again later.");
         }
 
         // Generate a cryptographically secure 6-digit OTP

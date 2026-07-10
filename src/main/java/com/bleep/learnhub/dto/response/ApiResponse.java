@@ -16,7 +16,7 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder()
                 .data(data)
                 .message(message)
-                .error(null)
+                .error("200")
                 .errorCode(null)
                 .build();
     }
@@ -25,17 +25,26 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder()
                 .data(null)
                 .message(message)
-                .error(null)
+                .error("200")
                 .errorCode(null)
                 .build();
     }
 
-    public static <T> ApiResponse<T> failure(String error, String errorCode) {
+    public static <T> ApiResponse<T> failure(String message, String error, String errorCode) {
         return ApiResponse.<T>builder()
                 .data(null)
-                .message(null)
+                .message(message)
                 .error(error)
                 .errorCode(errorCode)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> failure(String message, String error) {
+        return ApiResponse.<T>builder()
+                .data(null)
+                .message(message)
+                .error(error)
+                .errorCode(null)
                 .build();
     }
 }

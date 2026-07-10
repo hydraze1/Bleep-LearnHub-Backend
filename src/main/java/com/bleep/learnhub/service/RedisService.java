@@ -19,6 +19,9 @@ public class RedisService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
+    @org.springframework.beans.factory.annotation.Value("${app.otp.time-frame-minutes}")
+    private int otpTimeFrameMinutes;
+
     // ── Key Prefixes ────────────────────────────────────────────────────────────
 
     /** Stores the full session payload (LoginResponseDto as JSON). */
@@ -83,7 +86,7 @@ public class RedisService {
     public void saveOtpSession(String token, OtpSessionData data) {
         try {
             String json = objectMapper.writeValueAsString(data);
-            redisTemplate.opsForValue().set(OTP_SESSION_PREFIX + token, json, 30, TimeUnit.MINUTES);
+            redisTemplate.opsForValue().set(OTP_SESSION_PREFIX + token, json, otpTimeFrameMinutes, TimeUnit.MINUTES);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialise OTP session for token={}: {}", token, e.getMessage());
             throw new RuntimeException("Failed to save OTP session", e);
@@ -138,8 +141,8 @@ public class RedisService {
         String key = OTP_COUNT_PREFIX + username;
         Long count = redisTemplate.opsForValue().increment(key);
         if (count != null && count == 1L) {
-            // First OTP in this window — start the 30-minute expiry clock
-            redisTemplate.expire(key, 30, TimeUnit.MINUTES);
+            // First OTP in this window — start the expiry clock
+            redisTemplate.expire(key, otpTimeFrameMinutes, TimeUnit.MINUTES);
         }
         return count != null ? count.intValue() : 1;
     }

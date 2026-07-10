@@ -36,7 +36,7 @@ public class BatchService {
                 .subtitle(dto.getSubtitle())
                 .description(dto.getDescription())
                 .scheduledDate(dto.getScheduledDate())
-                .scheduledTime(dto.getScheduledTime())
+                .scheduledTime(dto.getScheduledTime() != null ? java.time.LocalTime.parse(dto.getScheduledTime()) : null)
                 .build();
 
         batch = batchRepository.save(batch);
@@ -50,7 +50,7 @@ public class BatchService {
         batch.setSubtitle(dto.getSubtitle());
         batch.setDescription(dto.getDescription());
         batch.setScheduledDate(dto.getScheduledDate());
-        batch.setScheduledTime(dto.getScheduledTime());
+        batch.setScheduledTime(dto.getScheduledTime() != null ? java.time.LocalTime.parse(dto.getScheduledTime()) : null);
 
         batchRepository.save(batch);
     }

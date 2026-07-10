@@ -18,6 +18,9 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @Value("${app.otp.time-frame-minutes}")
+    private int otpTimeFrameMinutes;
+
     @Async
     public void sendWelcomeEmail(String to, String username, String role) {
         try {
@@ -43,7 +46,7 @@ public class EmailService {
             message.setTo(to);
             message.setSubject("Your Bleep LearnHub OTP");
             message.setText("Your One-Time Password is: " + otp +
-                    "\n\nThis OTP will expire in 30 minutes. Do not share it with anyone.");
+                    "\n\nThis OTP will expire in " + otpTimeFrameMinutes + " minutes. Do not share it with anyone.");
             mailSender.send(message);
             log.info("OTP email sent successfully to {}", to);
         } catch (Exception e) {
