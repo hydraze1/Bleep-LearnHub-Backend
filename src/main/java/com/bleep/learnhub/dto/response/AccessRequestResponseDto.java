@@ -22,6 +22,7 @@ public class AccessRequestResponseDto {
     private String batchName;
     private String status;
     private String requestNote;
+    private Boolean hasBatchAccess;
     private String responseNote;
     private String requestedAt;
     private String resolvedAt;

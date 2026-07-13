@@ -1,0 +1,33 @@
+2026-07-14 02:04:14 [Thread-21] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Shutdown initiated...
+2026-07-14 02:04:14 [Thread-21] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Shutdown completed.
+2026-07-14 02:04:14 [restartedMain] INFO  [TraceID: ] c.b.l.BleepLearnhubBackendApplication - Starting BleepLearnhubBackendApplication using Java 21.0.11 with PID 87898 (/home/hydraze1/Desktop/code/github/Bleep-LearnHub-Backend/target/classes started by hydraze1 in /home/hydraze1/Desktop/code/github/Bleep-LearnHub-Backend)
+2026-07-14 02:04:14 [restartedMain] INFO  [TraceID: ] c.b.l.BleepLearnhubBackendApplication - No active profile set, falling back to 1 default profile: "default"
+2026-07-14 02:04:15 [restartedMain] INFO  [TraceID: ] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-14 02:04:15 [restartedMain] INFO  [TraceID: ] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-14 02:04:16 [restartedMain] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Starting...
+2026-07-14 02:04:16 [restartedMain] INFO  [TraceID: ] com.zaxxer.hikari.pool.HikariPool - HikariPool-7 - Added connection org.postgresql.jdbc.PgConnection@391ee650
+2026-07-14 02:04:16 [restartedMain] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Start completed.
+2026-07-14 02:04:16 [restartedMain] WARN  [TraceID: ] o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-14 02:04:17 [restartedMain] INFO  [TraceID: ] c.b.l.BleepLearnhubBackendApplication - Started BleepLearnhubBackendApplication in 2.948 seconds (process running for 3759.542)
+2026-07-14 02:04:19 [Thread-25] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown initiated...
+2026-07-14 02:04:19 [Thread-25] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown completed.
+2026-07-14 02:04:19 [restartedMain] INFO  [TraceID: ] c.b.l.BleepLearnhubBackendApplication - Starting BleepLearnhubBackendApplication using Java 21.0.11 with PID 87898 (/home/hydraze1/Desktop/code/github/Bleep-LearnHub-Backend/target/classes started by hydraze1 in /home/hydraze1/Desktop/code/github/Bleep-LearnHub-Backend)
+2026-07-14 02:04:19 [restartedMain] INFO  [TraceID: ] c.b.l.BleepLearnhubBackendApplication - No active profile set, falling back to 1 default profile: "default"
+2026-07-14 02:04:19 [restartedMain] INFO  [TraceID: ] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-14 02:04:19 [restartedMain] INFO  [TraceID: ] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-14 02:04:19 [restartedMain] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-8 - Starting...
+2026-07-14 02:04:20 [restartedMain] INFO  [TraceID: ] com.zaxxer.hikari.pool.HikariPool - HikariPool-8 - Added connection org.postgresql.jdbc.PgConnection@6c28f590
+2026-07-14 02:04:20 [restartedMain] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-8 - Start completed.
+2026-07-14 02:04:20 [restartedMain] WARN  [TraceID: ] o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-14 02:04:21 [restartedMain] INFO  [TraceID: ] c.b.l.BleepLearnhubBackendApplication - Started BleepLearnhubBackendApplication in 2.155 seconds (process running for 3763.166)
+2026-07-14 02:04:28 [Thread-29] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-8 - Shutdown initiated...
+2026-07-14 02:04:28 [Thread-29] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-8 - Shutdown completed.
+2026-07-14 02:04:28 [restartedMain] INFO  [TraceID: ] c.b.l.BleepLearnhubBackendApplication - Starting BleepLearnhubBackendApplication using Java 21.0.11 with PID 87898 (/home/hydraze1/Desktop/code/github/Bleep-LearnHub-Backend/target/classes started by hydraze1 in /home/hydraze1/Desktop/code/github/Bleep-LearnHub-Backend)
+2026-07-14 02:04:28 [restartedMain] INFO  [TraceID: ] c.b.l.BleepLearnhubBackendApplication - No active profile set, falling back to 1 default profile: "default"
+2026-07-14 02:04:29 [restartedMain] INFO  [TraceID: ] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-14 02:04:29 [restartedMain] INFO  [TraceID: ] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-07-14 02:04:29 [restartedMain] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-9 - Starting...
+2026-07-14 02:04:29 [restartedMain] INFO  [TraceID: ] com.zaxxer.hikari.pool.HikariPool - HikariPool-9 - Added connection org.postgresql.jdbc.PgConnection@24df978a
+2026-07-14 02:04:29 [restartedMain] INFO  [TraceID: ] com.zaxxer.hikari.HikariDataSource - HikariPool-9 - Start completed.
+2026-07-14 02:04:30 [restartedMain] WARN  [TraceID: ] o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-14 02:04:31 [restartedMain] INFO  [TraceID: ] c.b.l.BleepLearnhubBackendApplication - Started BleepLearnhubBackendApplication in 2.243 seconds (process running for 3772.829)

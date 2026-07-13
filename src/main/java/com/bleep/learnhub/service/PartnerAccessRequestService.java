@@ -54,6 +54,7 @@ public class PartnerAccessRequestService {
                 .batchName(batchName)
                 .status(AccessRequestStatus.PENDING)
                 .requestNote(dto.getRequestNote())
+                .hasBatchAccess(dto.getHasBatchAccess())
                 .build();
 
         accessRequestRepository.save(request);
@@ -103,6 +104,7 @@ public class PartnerAccessRequestService {
                 .batchName(request.getBatchName())
                 .status(request.getStatus().name())
                 .requestNote(request.getRequestNote())
+                .hasBatchAccess(request.getHasBatchAccess())
                 .responseNote(request.getResponseNote())
                 .requestedAt(request.getRequestedAt() != null ? request.getRequestedAt().toString() : null)
                 .resolvedAt(request.getResolvedAt() != null ? request.getResolvedAt().toString() : null)

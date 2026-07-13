@@ -17,4 +17,6 @@ public class AccessRequestDto {
     private UUID batchId;
 
     private String requestNote;
+
+    private Boolean hasBatchAccess;
 }

@@ -57,6 +57,9 @@ public class PartnerAccessRequest {
     @Column(name = "request_note", columnDefinition = "TEXT")
     private String requestNote;
 
+    @Column(name = "has_batch_access")
+    private Boolean hasBatchAccess;
+
     @Column(name = "response_note", columnDefinition = "TEXT")
     private String responseNote;
 
