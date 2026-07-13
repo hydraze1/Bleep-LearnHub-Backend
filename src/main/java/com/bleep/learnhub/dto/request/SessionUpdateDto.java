@@ -26,11 +26,9 @@ public class SessionUpdateDto {
     private String recordedLink;
     private String resourceLink;
 
-    @NotNull(message = "Sequence order is required")
-    private Integer sequenceOrder;
 
     private LocalDate scheduledDate;
 
-    @jakarta.validation.constraints.Pattern(regexp = "^(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d$", message = "wrong format need in 24hr format time")
+    @jakarta.validation.constraints.Pattern(regexp = "^(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d)?$", message = "wrong format need in 24hr format time")
     private String scheduledTime;
 }

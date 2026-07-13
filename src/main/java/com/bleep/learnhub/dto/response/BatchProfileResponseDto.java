@@ -17,8 +17,8 @@ public class BatchProfileResponseDto {
     private String title;
     private String subtitle;
     private String description;
-    private String scheduledDate;
-    private String scheduledTime;
+    private String startingDate;
+    private String endingDate;
     private String createdAt;
     private String updatedAt;
 }

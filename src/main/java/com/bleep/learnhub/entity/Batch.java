@@ -7,7 +7,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
@@ -40,11 +39,11 @@ public class Batch {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "scheduled_date", nullable = false)
-    private LocalDate scheduledDate;
+    @Column(name = "starting_date", nullable = false)
+    private LocalDate startingDate;
 
-    @Column(name = "scheduled_time", nullable = false)
-    private LocalTime scheduledTime;
+    @Column(name = "ending_date", nullable = false)
+    private LocalDate endingDate;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

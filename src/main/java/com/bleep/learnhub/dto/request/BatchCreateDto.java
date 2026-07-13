@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.UUID;
 
 @Data
@@ -22,10 +21,9 @@ public class BatchCreateDto {
     @NotBlank(message = "Description is required")
     private String description;
 
-    @NotNull(message = "Scheduled Date is required")
-    private LocalDate scheduledDate;
+    @NotNull(message = "Starting Date is required")
+    private LocalDate startingDate;
 
-    @NotNull(message = "Scheduled Time is required")
-    @jakarta.validation.constraints.Pattern(regexp = "^(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d$", message = "wrong format need in 24hr format time")
-    private String scheduledTime;
+    @NotNull(message = "Ending Date is required")
+    private LocalDate endingDate;
 }

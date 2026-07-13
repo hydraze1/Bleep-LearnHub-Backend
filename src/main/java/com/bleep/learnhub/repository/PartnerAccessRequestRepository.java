@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface PartnerAccessRequestRepository extends JpaRepository<PartnerAccessRequest, UUID> {
     List<PartnerAccessRequest> findByVendorId(UUID vendorId);
     List<PartnerAccessRequest> findByPartnerId(UUID partnerId);
+    boolean existsByPartnerIdAndStatus(UUID partnerId, com.bleep.learnhub.entity.enums.AccessRequestStatus status);
 }

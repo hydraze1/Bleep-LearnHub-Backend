@@ -12,6 +12,7 @@ import com.bleep.learnhub.repository.AuditLogRepository;
 import com.bleep.learnhub.repository.PartnerRepository;
 import com.bleep.learnhub.repository.UserRepository;
 import com.bleep.learnhub.repository.UserSessionRepository;
+import com.bleep.learnhub.repository.PartnerAccessRequestRepository;
 import com.bleep.learnhub.repository.VendorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class PartnerService {
     private final UserSessionRepository userSessionRepository;
     private final AuditLogRepository auditLogRepository;
     private final EmailService emailService;
+    private final PartnerAccessRequestRepository partnerAccessRequestRepository;
 
     @Transactional
     public void createPartner(PartnerCreateDto dto, String callerUsername, boolean isSuperAdmin) {
@@ -164,6 +166,11 @@ public class PartnerService {
             if (!partner.getVendor().getId().equals(vendor.getId())) {
                 throw new RuntimeException("Access denied: This partner does not belong to your vendor account");
             }
+        }
+
+        boolean hasActiveAccess = partnerAccessRequestRepository.existsByPartnerIdAndStatus(id, com.bleep.learnhub.entity.enums.AccessRequestStatus.APPROVED);
+        if (hasActiveAccess) {
+            throw new com.bleep.learnhub.exception.BusinessException("Cannot delete partner with active batch access. Remove access first.");
         }
 
         User partnerUser = partner.getUser();

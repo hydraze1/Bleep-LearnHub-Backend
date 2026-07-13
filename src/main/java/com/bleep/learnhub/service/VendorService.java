@@ -126,14 +126,10 @@ public class VendorService {
                 .orElseThrow(() -> new RuntimeException("Vendor not found with ID: " + id));
         User vendorUser = vendor.getUser();
 
-        // 1. Delete all partners linked to this vendor
+        // 1. Check if there are partners linked to this vendor
         List<Partner> partners = partnerRepository.findByVendorId(id);
-        for (Partner partner : partners) {
-            User partnerUser = partner.getUser();
-            auditLogRepository.nullifyUserReferences(partnerUser.getId());
-            userSessionRepository.deleteByUserId(partnerUser.getId());
-            partnerRepository.delete(partner);
-            userRepository.delete(partnerUser);
+        if (!partners.isEmpty()) {
+            throw new com.bleep.learnhub.exception.BusinessException("Cannot delete vendor with existing partners. Delete partners first.");
         }
 
         // 2. Delete the vendor and the vendor user

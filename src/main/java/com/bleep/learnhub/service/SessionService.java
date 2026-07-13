@@ -1,6 +1,7 @@
 package com.bleep.learnhub.service;
 
 import com.bleep.learnhub.dto.request.SessionCreateDto;
+import com.bleep.learnhub.dto.request.SessionReorderRequestDto;
 import com.bleep.learnhub.dto.request.SessionUpdateDto;
 import com.bleep.learnhub.dto.response.SessionDataDto;
 import com.bleep.learnhub.dto.response.SessionProfileResponseDto;
@@ -11,8 +12,10 @@ import com.bleep.learnhub.repository.CourseRepository;
 import com.bleep.learnhub.repository.SessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,6 +35,8 @@ public class SessionService {
             throw new ResourceNotFoundException("Batch not found with id: " + dto.getBatchId());
         }
 
+        Integer maxSequenceOrder = sessionRepository.findMaxSequenceOrderByBatchId(dto.getBatchId());
+
         Session session = Session.builder()
                 .courseId(dto.getCourseId())
                 .batchId(dto.getBatchId())
@@ -42,7 +47,7 @@ public class SessionService {
                 .liveLink(dto.getLiveLink())
                 .recordedLink(dto.getRecordedLink())
                 .resourceLink(dto.getResourceLink())
-                .sequenceOrder(dto.getSequenceOrder())
+                .sequenceOrder(maxSequenceOrder + 1)
                 .scheduledDate(dto.getScheduledDate())
                 .scheduledTime(dto.getScheduledTime() != null ? java.time.LocalTime.parse(dto.getScheduledTime()) : null)
                 .build();
@@ -61,7 +66,6 @@ public class SessionService {
         session.setLiveLink(dto.getLiveLink());
         session.setRecordedLink(dto.getRecordedLink());
         session.setResourceLink(dto.getResourceLink());
-        session.setSequenceOrder(dto.getSequenceOrder());
         session.setScheduledDate(dto.getScheduledDate());
         session.setScheduledTime(dto.getScheduledTime() != null ? java.time.LocalTime.parse(dto.getScheduledTime()) : null);
 
@@ -73,8 +77,52 @@ public class SessionService {
         sessionRepository.delete(session);
     }
 
-    public List<SessionDataDto> getSessionsByBatchId(UUID batchId) {
-        return sessionRepository.findByBatchIdOrderBySequenceOrderAsc(batchId).stream()
+    @Transactional
+    public void reorderSessions(SessionReorderRequestDto request) {
+        // Fetch all sessions belonging to the specified batch
+        List<Session> sessionsToUpdate = sessionRepository.findByBatchIdOrderBySequenceOrderAsc(request.getBatchId());
+
+        // Create a Map for quick lookup (ID -> Session)
+        Map<UUID, Session> sessionMap = sessionsToUpdate.stream()
+                .collect(Collectors.toMap(Session::getId, session -> session));
+
+        // Loop through the requested ID order and apply the new sequence order
+        for (SessionReorderRequestDto.SessionOrderItem item : request.getSessionIds()) {
+            UUID sessionId = item.getId();
+            Session session = sessionMap.get(sessionId);
+            if (session != null) {
+                // Verify that the session belongs to the specified course
+                if (!session.getCourseId().equals(request.getCourseId())) {
+                    throw new RuntimeException("Session " + sessionId + " does not belong to course " + request.getCourseId());
+                }
+                session.setSequenceOrder(item.getIndex());
+            } else {
+                throw new RuntimeException("Session not found with ID: " + sessionId + " in Batch: " + request.getBatchId());
+            }
+        }
+
+        // Save them all back to the database in one bulk action
+        sessionRepository.saveAll(sessionsToUpdate);
+    }
+
+    public List<SessionDataDto> getAllSessions(UUID courseId, UUID batchId, String type, String search, String sortOrder) {
+        List<Session> sessions;
+        if (batchId != null) {
+            sessions = sessionRepository.findByBatchIdOrderBySequenceOrderAsc(batchId);
+        } else {
+            sessions = sessionRepository.findAll();
+        }
+        
+        return sessions.stream()
+                .filter(s -> courseId == null || courseId.equals(s.getCourseId()))
+                .filter(s -> type == null || (s.getSessionType() != null && s.getSessionType().name().equalsIgnoreCase(type)))
+                .filter(s -> search == null || (s.getTitle() != null && s.getTitle().toLowerCase().contains(search.toLowerCase())))
+                .sorted((s1, s2) -> {
+                    if ("desc".equalsIgnoreCase(sortOrder)) {
+                        return s2.getSequenceOrder().compareTo(s1.getSequenceOrder());
+                    }
+                    return s1.getSequenceOrder().compareTo(s2.getSequenceOrder());
+                })
                 .map(this::mapToDataDto)
                 .collect(Collectors.toList());
     }

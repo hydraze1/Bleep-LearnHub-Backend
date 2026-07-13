@@ -49,8 +49,14 @@ public class BatchController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('VENDOR', 'PARTNER')")
-    public ResponseEntity<ApiResponse<List<BatchDataDto>>> getBatchesByCourseId(@RequestParam UUID courseId) {
-        List<BatchDataDto> batches = batchService.getBatchesByCourseId(courseId);
+    public ResponseEntity<ApiResponse<List<BatchDataDto>>> getAllBatches(
+            @RequestParam(required = false) UUID courseId) {
+        List<BatchDataDto> batches;
+        if (courseId != null) {
+            batches = batchService.getBatchesByCourseId(courseId);
+        } else {
+            batches = batchService.getAllBatches();
+        }
         return ResponseEntity.ok(ApiResponse.success(batches, "Batches retrieved successfully"));
     }
 

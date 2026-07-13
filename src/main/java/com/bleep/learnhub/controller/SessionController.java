@@ -1,6 +1,7 @@
 package com.bleep.learnhub.controller;
 
 import com.bleep.learnhub.dto.request.SessionCreateDto;
+import com.bleep.learnhub.dto.request.SessionReorderRequestDto;
 import com.bleep.learnhub.dto.request.SessionUpdateDto;
 import com.bleep.learnhub.dto.response.ApiResponse;
 import com.bleep.learnhub.dto.response.SessionDataDto;
@@ -49,8 +50,13 @@ public class SessionController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('VENDOR', 'PARTNER')")
-    public ResponseEntity<ApiResponse<List<SessionDataDto>>> getSessionsByBatchId(@RequestParam UUID batchId) {
-        List<SessionDataDto> sessions = sessionService.getSessionsByBatchId(batchId);
+    public ResponseEntity<ApiResponse<List<SessionDataDto>>> getAllSessions(
+            @RequestParam(required = false) UUID courseId,
+            @RequestParam(required = false) UUID batchId,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String sortOrder) {
+        List<SessionDataDto> sessions = sessionService.getAllSessions(courseId, batchId, type, search, sortOrder);
         return ResponseEntity.ok(ApiResponse.success(sessions, "Sessions retrieved successfully"));
     }
 
@@ -59,5 +65,14 @@ public class SessionController {
     public ResponseEntity<ApiResponse<SessionProfileResponseDto>> getSessionById(@PathVariable UUID id) {
         SessionProfileResponseDto session = sessionService.getSessionById(id);
         return ResponseEntity.ok(ApiResponse.success(session, "Session retrieved successfully"));
+    }
+
+    @PutMapping("/reorder")
+    @PreAuthorize("hasAuthority('VENDOR')")
+    public ResponseEntity<ApiResponse<Void>> reorderSessions(
+            @Valid @RequestBody SessionReorderRequestDto request) {
+        
+        sessionService.reorderSessions(request);
+        return ResponseEntity.ok(ApiResponse.success("Sessions reordered successfully"));
     }
 }

@@ -35,8 +35,8 @@ public class BatchService {
                 .title(dto.getTitle())
                 .subtitle(dto.getSubtitle())
                 .description(dto.getDescription())
-                .scheduledDate(dto.getScheduledDate())
-                .scheduledTime(dto.getScheduledTime() != null ? java.time.LocalTime.parse(dto.getScheduledTime()) : null)
+                .startingDate(dto.getStartingDate())
+                .endingDate(dto.getEndingDate())
                 .build();
 
         batch = batchRepository.save(batch);
@@ -49,8 +49,8 @@ public class BatchService {
         batch.setTitle(dto.getTitle());
         batch.setSubtitle(dto.getSubtitle());
         batch.setDescription(dto.getDescription());
-        batch.setScheduledDate(dto.getScheduledDate());
-        batch.setScheduledTime(dto.getScheduledTime() != null ? java.time.LocalTime.parse(dto.getScheduledTime()) : null);
+        batch.setStartingDate(dto.getStartingDate());
+        batch.setEndingDate(dto.getEndingDate());
 
         batchRepository.save(batch);
     }
@@ -72,6 +72,12 @@ public class BatchService {
                 .collect(Collectors.toList());
     }
 
+    public List<BatchDataDto> getAllBatches() {
+        return batchRepository.findAll().stream()
+                .map(this::mapToDataDto)
+                .collect(Collectors.toList());
+    }
+
     public BatchProfileResponseDto getBatchById(UUID id) {
         return mapToProfileDto(getBatchEntity(id));
     }
@@ -88,8 +94,8 @@ public class BatchService {
                 .title(batch.getTitle())
                 .subtitle(batch.getSubtitle())
                 .description(batch.getDescription())
-                .scheduledDate(batch.getScheduledDate() != null ? batch.getScheduledDate().toString() : null)
-                .scheduledTime(batch.getScheduledTime() != null ? batch.getScheduledTime().toString() : null)
+                .startingDate(batch.getStartingDate() != null ? batch.getStartingDate().toString() : null)
+                .endingDate(batch.getEndingDate() != null ? batch.getEndingDate().toString() : null)
                 .createdAt(batch.getCreatedAt() != null ? batch.getCreatedAt().toString() : null)
                 .updatedAt(batch.getUpdatedAt() != null ? batch.getUpdatedAt().toString() : null)
                 .build();
@@ -102,8 +108,8 @@ public class BatchService {
                 .title(batch.getTitle())
                 .subtitle(batch.getSubtitle())
                 .description(batch.getDescription())
-                .scheduledDate(batch.getScheduledDate() != null ? batch.getScheduledDate().toString() : null)
-                .scheduledTime(batch.getScheduledTime() != null ? batch.getScheduledTime().toString() : null)
+                .startingDate(batch.getStartingDate() != null ? batch.getStartingDate().toString() : null)
+                .endingDate(batch.getEndingDate() != null ? batch.getEndingDate().toString() : null)
                 .createdAt(batch.getCreatedAt() != null ? batch.getCreatedAt().toString() : null)
                 .updatedAt(batch.getUpdatedAt() != null ? batch.getUpdatedAt().toString() : null)
                 .build();
