@@ -44,3 +44,6 @@ networks:
 # Delete Images:      docker rmi postgres:16-alpine redis:7-alpine
 # Full Cleanup:       docker-compose down -v && docker rmi postgres:16-alpine redis:7-alpine
 # ----------------------------
+
+
+

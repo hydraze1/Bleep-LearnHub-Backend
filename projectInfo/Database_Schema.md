@@ -417,6 +417,8 @@ When a Partner wants to access a Vendor's course (and optionally a specific batc
 | `batch_name` | VARCHAR(255) | Nullable | Denormalized batch name. |
 | `status` | ENUM (String) | Not Null | One of `PENDING`, `APPROVED`, `REJECTED`. |
 | `request_note` | TEXT | Nullable | Note from the Partner explaining the request. |
+| `has_batch_access` | BOOLEAN | Nullable | Whether the request is for batch level access. |
+| `max_students` | INTEGER | Nullable | Maximum allowed students for this access request. |
 | `response_note` | TEXT | Nullable | Note from the Vendor with approval/rejection reason. |
 | `requested_at` | TIMESTAMP | Auto-set, Not updatable | When the request was submitted. |
 | `resolved_at` | TIMESTAMP | Nullable | When the Vendor approved or rejected the request. |

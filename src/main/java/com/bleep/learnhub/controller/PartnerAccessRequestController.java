@@ -1,7 +1,8 @@
 package com.bleep.learnhub.controller;
 
-import com.bleep.learnhub.dto.request.AccessRequestDto;
 import com.bleep.learnhub.dto.request.AccessStatusUpdateDto;
+import com.bleep.learnhub.dto.request.PartnerAccessRequestCreateDto;
+import com.bleep.learnhub.dto.request.VendorAccessRequestCreateDto;
 import com.bleep.learnhub.dto.response.AccessRequestResponseDto;
 import com.bleep.learnhub.dto.response.ApiResponse;
 import com.bleep.learnhub.service.PartnerAccessRequestService;
@@ -24,13 +25,23 @@ public class PartnerAccessRequestController {
     private final PartnerAccessRequestService accessRequestService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('VENDOR')")
+    public ResponseEntity<ApiResponse<Void>> createAccessRequest(
+            @Valid @RequestBody VendorAccessRequestCreateDto dto,
+            Authentication authentication) {
+        accessRequestService.createAccessRequestByVendor(dto, authentication.getName());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Access request created successfully by vendor"));
+    }
+
+    @PostMapping("/request")
     @PreAuthorize("hasAuthority('PARTNER')")
     public ResponseEntity<ApiResponse<Void>> requestAccess(
-            @Valid @RequestBody AccessRequestDto dto,
+            @Valid @RequestBody PartnerAccessRequestCreateDto dto,
             Authentication authentication) {
-        accessRequestService.createAccessRequest(dto, authentication.getName());
+        accessRequestService.createAccessRequestByPartner(dto, authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Access requested successfully"));
+                .body(ApiResponse.success("Access requested successfully by partner"));
     }
 
     @PutMapping("/{id}/status")
@@ -57,7 +68,7 @@ public class PartnerAccessRequestController {
     }
     
     @GetMapping("/partner/{partnerId}")
-    @PreAuthorize("hasAnyAuthority('PARTNER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('VENDOR', 'SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<List<AccessRequestResponseDto>>> getPartnerRequests(@PathVariable UUID partnerId) {
         List<AccessRequestResponseDto> requests = accessRequestService.getRequestsByPartnerId(partnerId);
         return ResponseEntity.ok(ApiResponse.success(requests, "Requests retrieved successfully"));

@@ -1,18 +1,17 @@
 package com.bleep.learnhub.service;
 
-import com.bleep.learnhub.dto.request.AccessRequestDto;
 import com.bleep.learnhub.dto.request.AccessStatusUpdateDto;
+import com.bleep.learnhub.dto.request.PartnerAccessRequestCreateDto;
+import com.bleep.learnhub.dto.request.VendorAccessRequestCreateDto;
 import com.bleep.learnhub.dto.response.AccessRequestResponseDto;
-import com.bleep.learnhub.entity.Batch;
-import com.bleep.learnhub.entity.Course;
 import com.bleep.learnhub.entity.Partner;
+import com.bleep.learnhub.entity.Vendor;
 import com.bleep.learnhub.entity.PartnerAccessRequest;
 import com.bleep.learnhub.entity.enums.AccessRequestStatus;
 import com.bleep.learnhub.exception.ResourceNotFoundException;
-import com.bleep.learnhub.repository.BatchRepository;
-import com.bleep.learnhub.repository.CourseRepository;
 import com.bleep.learnhub.repository.PartnerAccessRequestRepository;
 import com.bleep.learnhub.repository.PartnerRepository;
+import com.bleep.learnhub.repository.VendorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,34 +26,52 @@ public class PartnerAccessRequestService {
 
     private final PartnerAccessRequestRepository accessRequestRepository;
     private final PartnerRepository partnerRepository;
-    private final CourseRepository courseRepository;
-    private final BatchRepository batchRepository;
+    private final VendorRepository vendorRepository;
 
-    public void createAccessRequest(AccessRequestDto dto, String partnerUsername) {
-        Partner partner = partnerRepository.findByUserUsername(partnerUsername)
-                .orElseThrow(() -> new ResourceNotFoundException("Partner profile not found for user: " + partnerUsername));
+    public void createAccessRequestByVendor(VendorAccessRequestCreateDto dto, String vendorUsername) {
+        Vendor vendor = vendorRepository.findByUserUsername(vendorUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor profile not found for user: " + vendorUsername));
 
-        Course course = courseRepository.findById(dto.getCourseId())
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + dto.getCourseId()));
-
-        String batchName = null;
-        if (dto.getBatchId() != null) {
-            Batch batch = batchRepository.findById(dto.getBatchId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Batch not found with id: " + dto.getBatchId()));
-            batchName = batch.getTitle();
+        // Verify that the partner exists
+        if (!partnerRepository.existsById(dto.getPartnerId())) {
+            throw new ResourceNotFoundException("Partner profile not found with id: " + dto.getPartnerId());
         }
 
         PartnerAccessRequest request = PartnerAccessRequest.builder()
-                .partnerId(partner.getId())
-                .vendorId(dto.getVendorId())
+                .partnerId(dto.getPartnerId())
+                .vendorId(vendor.getId())
                 .courseId(dto.getCourseId())
                 .batchId(dto.getBatchId())
-                .partnerName(partner.getCompanyName())
-                .courseName(course.getTitle())
-                .batchName(batchName)
+                .partnerName(dto.getPartnerName())
+                .courseName(dto.getCourseName())
+                .batchName(dto.getBatchName())
+                .status(AccessRequestStatus.APPROVED)
+                .responseNote(dto.getNote())
+                .maxStudents(dto.getMaxStudents())
+                .resolvedAt(LocalDateTime.now())
+                .build();
+
+        accessRequestRepository.save(request);
+    }
+
+    public void createAccessRequestByPartner(PartnerAccessRequestCreateDto dto, String partnerUsername) {
+        Partner partner = partnerRepository.findByUserUsername(partnerUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner profile not found for user: " + partnerUsername));
+
+        // The vendor is the partner's parent vendor
+        UUID vendorId = partner.getVendor().getId();
+
+        PartnerAccessRequest request = PartnerAccessRequest.builder()
+                .partnerId(dto.getPartnerId())
+                .vendorId(vendorId)
+                .courseId(dto.getCourseId())
+                .batchId(dto.getBatchId())
+                .partnerName(dto.getPartnerName())
+                .courseName(dto.getCourseName())
+                .batchName(dto.getBatchName())
                 .status(AccessRequestStatus.PENDING)
-                .requestNote(dto.getRequestNote())
-                .hasBatchAccess(dto.getHasBatchAccess())
+                .requestNote(dto.getNote())
+                .maxStudents(dto.getMaxStudents())
                 .build();
 
         accessRequestRepository.save(request);
@@ -66,6 +83,22 @@ public class PartnerAccessRequestService {
 
         request.setStatus(dto.getStatus());
         request.setResponseNote(dto.getResponseNote());
+
+        if (dto.getMaxStudents() != null) {
+            request.setMaxStudents(dto.getMaxStudents());
+        }
+        if (dto.getCourseId() != null) {
+            request.setCourseId(dto.getCourseId());
+        }
+        if (dto.getCourseName() != null) {
+            request.setCourseName(dto.getCourseName());
+        }
+        if (dto.getBatchId() != null) {
+            request.setBatchId(dto.getBatchId());
+        }
+        if (dto.getBatchName() != null) {
+            request.setBatchName(dto.getBatchName());
+        }
         
         if (dto.getStatus() == AccessRequestStatus.APPROVED || dto.getStatus() == AccessRequestStatus.REJECTED) {
             request.setResolvedAt(LocalDateTime.now());
@@ -105,6 +138,7 @@ public class PartnerAccessRequestService {
                 .status(request.getStatus().name())
                 .requestNote(request.getRequestNote())
                 .hasBatchAccess(request.getHasBatchAccess())
+                .maxStudents(request.getMaxStudents())
                 .responseNote(request.getResponseNote())
                 .requestedAt(request.getRequestedAt() != null ? request.getRequestedAt().toString() : null)
                 .resolvedAt(request.getResolvedAt() != null ? request.getResolvedAt().toString() : null)

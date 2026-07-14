@@ -37,3 +37,14 @@ hydraze1@hydraze1-Nitro:~/Desktop/code/github/ADT-UI/src/hooks/AdtApi/hooks$ ls
 Admission.hook.ts  Dashboard.hook.ts  DeathCase.hook.ts  Discharge.hook.ts  Examination.hook.ts  Transfer.hook.ts  Treatment.hook.ts
 
 hydraze1@hydraze1-Nitro:~/Desktop/code/github/ADT-UI/src/hooks/AdtApi/hooks$ 
+
+
+
+
+
+
+
+
+
+
+docker exec -it bleep-postgres psql -U myuser -d learnhub_db -c "ALTER TABLE batches DROP COLUMN scheduled_date; ALTER TABLE batches DROP COLUMN scheduled_time;"

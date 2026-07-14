@@ -11,4 +11,14 @@ public class AccessStatusUpdateDto {
     private AccessRequestStatus status;
 
     private String responseNote;
+
+    private Integer maxStudents;
+
+    private java.util.UUID courseId;
+
+    private String courseName;
+
+    private java.util.UUID batchId;
+
+    private String batchName;
 }

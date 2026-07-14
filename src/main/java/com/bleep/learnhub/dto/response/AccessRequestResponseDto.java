@@ -23,6 +23,7 @@ public class AccessRequestResponseDto {
     private String status;
     private String requestNote;
     private Boolean hasBatchAccess;
+    private Integer maxStudents;
     private String responseNote;
     private String requestedAt;
     private String resolvedAt;

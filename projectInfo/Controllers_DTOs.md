@@ -212,11 +212,12 @@ Allows Partners to request access to courses/batches managed by Vendors, and all
 
 | HTTP Method | Path | Purpose | Request Body | Response Body | Access |
 |---|---|---|---|---|---|
-| `POST` | `/access-requests` | Request course/batch access | `AccessRequestDto` | `ApiResponse<Void>` | `PARTNER` |
+| `POST` | `/access-requests` | Create access request directly (APPROVED status) | `VendorAccessRequestCreateDto` | `ApiResponse<Void>` | `VENDOR` |
+| `POST` | `/access-requests/request` | Submit course/batch access request (PENDING status) | `PartnerAccessRequestCreateDto` | `ApiResponse<Void>` | `PARTNER` |
 | `PUT` | `/access-requests/{id}/status` | Update request status (approve/reject) | `AccessStatusUpdateDto` | `ApiResponse<Void>` | `VENDOR` |
 | `DELETE` | `/access-requests/{id}` | Delete access record | — | `ApiResponse<Void>` | `VENDOR` |
 | `GET` | `/access-requests/vendor/{vendorId}` | List requests received by a vendor | — | `ApiResponse<List<AccessRequestResponseDto>>` | `VENDOR` or `SUPER_ADMIN` |
-| `GET` | `/access-requests/partner/{partnerId}` | List requests submitted by a partner | — | `ApiResponse<List<AccessRequestResponseDto>>` | `PARTNER` or `SUPER_ADMIN` |
+| `GET` | `/access-requests/partner/{partnerId}` | List requests submitted by a partner | — | `ApiResponse<List<AccessRequestResponseDto>>` | `VENDOR` or `SUPER_ADMIN` |
 
 ---
 
@@ -238,6 +239,26 @@ Allows students to submit complaints publicly, and allows Vendors and Partners t
 | `DELETE` | `/complaints/{id}` | Delete a complaint | — | `ApiResponse<Void>` | `VENDOR` |
 | `GET` | `/complaints` | List complaints by vendor or partner | Query Param `vendorId` or `partnerId` | `ApiResponse<List<ComplaintResponseDto>>` | `VENDOR` or `PARTNER` |
 | `GET` | `/complaints/{id}` | Get complaint details | — | `ApiResponse<ComplaintResponseDto>` | `VENDOR` or `PARTNER` |
+
+---
+
+## 8b. PartnerPortalController.java
+
+**File:** `controller/PartnerPortalController.java`  
+**Path:** `/partner-portal/**`  
+**Access:** `@PreAuthorize("hasAuthority('VENDOR')")` — **Vendor only**
+
+### Purpose
+Allows Vendors to audit, view, and analyze details of specific partners (courses they access, batches under those courses, session engagement with student access counts, and student list with enrollment details).
+
+### Endpoints
+
+| HTTP Method | Path | Purpose | Request Body | Response Body |
+|---|---|---|---|---|
+| `GET` | `/partner-portal/partner/{partnerId}/courses` | Get courses the partner has access to | — | `ApiResponse<List<CourseDataDto>>` |
+| `GET` | `/partner-portal/partner/{partnerId}/courses/{courseId}/batches` | Get batches under course with access data | — | `ApiResponse<List<BatchDataDto>>` |
+| `GET` | `/partner-portal/partner/{partnerId}/batches/{batchId}/sessions` | Get sessions with student counts | — | `ApiResponse<List<PartnerSessionResponseDto>>` |
+| `GET` | `/partner-portal/partner/{partnerId}/students` | Get students with enrollment data | — | `ApiResponse<List<PartnerStudentResponseDto>>` |
 
 ---
 
@@ -471,18 +492,37 @@ Request DTOs are what the client sends in the HTTP request body. They use Jakart
 | `scheduledDate` | Optional | Updated date. |
 | `scheduledTime` | Optional | Updated time. |
 
----
+## 25. VendorAccessRequestCreateDto.java
 
-## 25. AccessRequestDto.java
-
-**Used by:** `POST /access-requests`
+**Used by:** `POST /access-requests` (by Vendor)
 
 | Field | Validation | Description |
 |---|---|---|
-| `vendorId` | `@NotNull` | Target vendor ID. |
 | `courseId` | `@NotNull` | Target course ID. |
-| `batchId` | Optional | Target batch ID (optional). |
-| `requestNote` | Optional | Note describing request reason. |
+| `batchId` | Optional | Target batch ID. |
+| `courseName` | `@NotBlank` | Name of the course. |
+| `batchName` | Optional | Name of the batch. |
+| `partnerId` | `@NotNull` | Target partner ID. |
+| `partnerName` | `@NotBlank` | Target partner's name. |
+| `maxStudents` | `@NotNull` | Maximum students allowed. |
+| `note` | Optional | Response/resolution note. |
+
+---
+
+## 25b. PartnerAccessRequestCreateDto.java
+
+**Used by:** `POST /access-requests/request` (by Partner)
+
+| Field | Validation | Description |
+|---|---|---|
+| `courseId` | `@NotNull` | Target course ID. |
+| `courseName` | `@NotBlank` | Name of the course. |
+| `batchId` | Optional | Target batch ID. |
+| `batchName` | Optional | Name of the batch. |
+| `partnerId` | `@NotNull` | Partner ID. |
+| `partnerName` | `@NotBlank` | Partner name. |
+| `maxStudents` | `@NotNull` | Maximum students requested. |
+| `note` | Optional | Request note. |
 
 ---
 
@@ -494,6 +534,11 @@ Request DTOs are what the client sends in the HTTP request body. They use Jakart
 |---|---|---|
 | `status` | `@NotNull` | Updated status (`AccessRequestStatus` enum). |
 | `responseNote` | Optional | Note added by the vendor on resolution. |
+| `maxStudents` | Optional | Update maximum students permitted. |
+| `courseId` | Optional | Update course ID. |
+| `courseName` | Optional | Update course name. |
+| `batchId` | Optional | Update batch ID. |
+| `batchName` | Optional | Update batch name. |
 
 ---
 

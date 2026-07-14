@@ -14,6 +14,7 @@ import java.util.UUID;
 public class BatchDataDto {
     private UUID id;
     private UUID courseId;
+    private String courseName;
     private String title;
     private String subtitle;
     private String description;

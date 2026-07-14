@@ -63,6 +63,9 @@ public class PartnerAccessRequest {
     @Column(name = "response_note", columnDefinition = "TEXT")
     private String responseNote;
 
+    @Column(name = "max_students")
+    private Integer maxStudents;
+
     @CreationTimestamp
     @Column(name = "requested_at", updatable = false)
     private LocalDateTime requestedAt;
