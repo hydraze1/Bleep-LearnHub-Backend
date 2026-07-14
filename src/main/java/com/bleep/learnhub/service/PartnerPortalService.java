@@ -162,6 +162,31 @@ public class PartnerPortalService {
         }).collect(Collectors.toList());
     }
 
+    public List<PartnerSessionResponseDto> getLimitCrossedSessionsByPartner(UUID partnerId) {
+        List<PartnerAccessRequest> requests = accessRequestRepository.findByPartnerId(partnerId).stream()
+                .filter(r -> r.getStatus() == AccessRequestStatus.APPROVED)
+                .collect(Collectors.toList());
+
+        if (requests.isEmpty()) {
+            return List.of();
+        }
+
+        List<Batch> allBatches = new java.util.ArrayList<>();
+        for (PartnerAccessRequest request : requests) {
+            if (request.getBatchId() != null) {
+                batchRepository.findById(request.getBatchId()).ifPresent(allBatches::add);
+            } else if (request.getCourseId() != null) {
+                allBatches.addAll(batchRepository.findByCourseId(request.getCourseId()));
+            }
+        }
+
+        return allBatches.stream()
+                .distinct()
+                .flatMap(batch -> getSessionsByBatchAndPartner(partnerId, batch.getId()).stream())
+                .filter(PartnerSessionResponseDto::isLimitExceeded)
+                .collect(Collectors.toList());
+    }
+
     private CourseDataDto mapToCourseDataDto(Course course) {
         return CourseDataDto.builder()
                 .id(course.getId())

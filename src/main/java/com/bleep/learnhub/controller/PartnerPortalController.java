@@ -51,4 +51,11 @@ public class PartnerPortalController {
         List<PartnerStudentResponseDto> students = partnerPortalService.getStudentsByPartner(partnerId);
         return ResponseEntity.ok(ApiResponse.success(students, "Students retrieved successfully"));
     }
+
+    @GetMapping("/partner/{partnerId}/sessions/limit-crossed")
+    public ResponseEntity<ApiResponse<List<PartnerSessionResponseDto>>> getLimitCrossedSessions(
+            @PathVariable UUID partnerId) {
+        List<PartnerSessionResponseDto> sessions = partnerPortalService.getLimitCrossedSessionsByPartner(partnerId);
+        return ResponseEntity.ok(ApiResponse.success(sessions, "Limit crossed sessions retrieved successfully"));
+    }
 }

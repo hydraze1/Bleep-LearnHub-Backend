@@ -27,7 +27,7 @@ public class Student {
     private UUID id;
 
     @Column(name = "partner_id", nullable = false)
-    private UUID partnerId;
+    private UUID partnerId; 
 
     @Column(unique = true, nullable = false, length = 100)
     private String uid;

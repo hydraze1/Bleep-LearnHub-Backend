@@ -8,6 +8,7 @@ import com.bleep.learnhub.entity.Partner;
 import com.bleep.learnhub.entity.Vendor;
 import com.bleep.learnhub.entity.PartnerAccessRequest;
 import com.bleep.learnhub.entity.enums.AccessRequestStatus;
+import com.bleep.learnhub.exception.BusinessException;
 import com.bleep.learnhub.exception.ResourceNotFoundException;
 import com.bleep.learnhub.repository.PartnerAccessRequestRepository;
 import com.bleep.learnhub.repository.PartnerRepository;
@@ -37,6 +38,10 @@ public class PartnerAccessRequestService {
             throw new ResourceNotFoundException("Partner profile not found with id: " + dto.getPartnerId());
         }
 
+        if (accessRequestRepository.existsByPartnerIdAndCourseIdAndBatchId(dto.getPartnerId(), dto.getCourseId(), dto.getBatchId())) {
+            throw new BusinessException("Partner already has an access request for this batch of the course");
+        }
+
         PartnerAccessRequest request = PartnerAccessRequest.builder()
                 .partnerId(dto.getPartnerId())
                 .vendorId(vendor.getId())
@@ -60,6 +65,10 @@ public class PartnerAccessRequestService {
 
         // The vendor is the partner's parent vendor
         UUID vendorId = partner.getVendor().getId();
+
+        if (accessRequestRepository.existsByPartnerIdAndCourseIdAndBatchId(dto.getPartnerId(), dto.getCourseId(), dto.getBatchId())) {
+            throw new BusinessException("Partner already has an access request for this batch of the course");
+        }
 
         PartnerAccessRequest request = PartnerAccessRequest.builder()
                 .partnerId(dto.getPartnerId())
