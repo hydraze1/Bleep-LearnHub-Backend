@@ -34,18 +34,24 @@ public class StudentDataSyncService {
             student = studentRepository.findById(request.getStudentId())
                     .orElseThrow(() -> new RuntimeException("Student not found with id: " + request.getStudentId()));
         } else {
-            // studentId not sent → create new student
-            student = Student.builder()
-                    .partnerId(request.getPartnerId())
-                    .firstName(request.getFirstName())
-                    .lastName(request.getLastName())
-                    .email(request.getEmail())
-                    .phoneNumber(request.getPhoneNumber())
-                    .college(request.getCollege())
-                    .branch(request.getBranch())
-                    .academicYear(request.getAcademicYear())
-                    .build();
-            student = studentRepository.save(student);
+            // studentId not sent → check if student with this email already exists
+            java.util.Optional<Student> existingStudent = studentRepository.findByEmail(request.getEmail());
+            if (existingStudent.isPresent()) {
+                student = existingStudent.get();
+            } else {
+                // create new student
+                student = Student.builder()
+                        .partnerId(request.getPartnerId())
+                        .firstName(request.getFirstName())
+                        .lastName(request.getLastName())
+                        .email(request.getEmail())
+                        .phoneNumber(request.getPhoneNumber())
+                        .college(request.getCollege())
+                        .branch(request.getBranch())
+                        .academicYear(request.getAcademicYear())
+                        .build();
+                student = studentRepository.save(student);
+            }
         }
 
         UUID studentId = student.getId();
@@ -74,24 +80,35 @@ public class StudentDataSyncService {
             }
             // If both match → skip saving, use existing enrollment
         } else {
-            // enrollmentId not sent → save new enrollment
-            enrollment = StudentEnrollment.builder()
-                    .studentId(studentId)
-                    .courseId(request.getCourseId())
-                    .batchId(request.getEnrollmentBatchId())
-                    .courseName(request.getEnrollmentCourseName())
-                    .batchName(request.getEnrollmentBatchName())
-                    .status(request.getEnrollmentStatus())
-                    .build();
-            enrollment = studentEnrollmentRepository.save(enrollment);
+            // enrollmentId not sent → check if enrollment already exists for this student and course and batch
+            java.util.Optional<StudentEnrollment> existingEnrollment = studentEnrollmentRepository.findByStudentIdAndCourseIdAndBatchId(studentId, request.getCourseId(), request.getEnrollmentBatchId());
+            if (existingEnrollment.isPresent()) {
+                enrollment = existingEnrollment.get();
+            } else {
+                // save new enrollment
+                enrollment = StudentEnrollment.builder()
+                        .studentId(studentId)
+                        .courseId(request.getCourseId())
+                        .batchId(request.getEnrollmentBatchId())
+                        .courseName(request.getEnrollmentCourseName())
+                        .batchName(request.getEnrollmentBatchName())
+                        .status(request.getEnrollmentStatus())
+                        .build();
+                enrollment = studentEnrollmentRepository.save(enrollment);
+            }
         }
 
         // ── 3. Session Log ──────────────────────────────────────────
-        StudentSessionLog sessionLog;
-        if (request.getSessionId() != null && studentSessionLogRepository.existsBySessionId(request.getSessionId())) {
-            // Same sessionId already exists → don't save, return existing
-            sessionLog = studentSessionLogRepository.findBySessionId(request.getSessionId());
-        } else {
+        StudentSessionLog sessionLog = null;
+        if (request.getSessionId() != null) {
+            // Check if same session log already exists for this student
+            java.util.Optional<StudentSessionLog> existingSessionLog = studentSessionLogRepository.findByStudentIdAndSessionId(studentId, request.getSessionId());
+            if (existingSessionLog.isPresent()) {
+                sessionLog = existingSessionLog.get();
+            }
+        }
+        
+        if (sessionLog == null) {
             // New session → save
             LocalDateTime now = LocalDateTime.now();
             sessionLog = StudentSessionLog.builder()

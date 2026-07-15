@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, UUID> {
     List<Student> findByPartnerId(UUID partnerId);
+    java.util.Optional<Student> findByEmail(String email);
 }

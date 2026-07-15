@@ -15,8 +15,8 @@ public class OpenDataSyncController {
     private final StudentDataSyncService studentDataSyncService;
 
     @PostMapping("/student-data")
-    public ResponseEntity<StudentDataSyncResponseDto> syncStudentData(@RequestBody StudentDataSyncRequest request) {
+    public ResponseEntity<com.bleep.learnhub.dto.response.ApiResponse<StudentDataSyncResponseDto>> syncStudentData(@RequestBody StudentDataSyncRequest request) {
         StudentDataSyncResponseDto response = studentDataSyncService.syncStudentData(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(com.bleep.learnhub.dto.response.ApiResponse.success(response, "Student data synced successfully"));
     }
 }
