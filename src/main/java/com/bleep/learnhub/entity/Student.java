@@ -29,9 +29,6 @@ public class Student {
     @Column(name = "partner_id", nullable = false)
     private UUID partnerId; 
 
-    @Column(unique = true, nullable = false, length = 100)
-    private String uid;
-
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 

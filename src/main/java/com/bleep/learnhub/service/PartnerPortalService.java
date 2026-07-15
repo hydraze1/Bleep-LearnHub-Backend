@@ -148,7 +148,6 @@ public class PartnerPortalService {
 
             return PartnerStudentResponseDto.builder()
                     .id(student.getId())
-                    .uid(student.getUid())
                     .firstName(student.getFirstName())
                     .lastName(student.getLastName())
                     .fullName(student.getFullName())

@@ -9,7 +9,6 @@ import java.util.UUID;
 @Builder
 public class PartnerStudentResponseDto {
     private UUID id;
-    private String uid;
     private String firstName;
     private String lastName;
     private String fullName;

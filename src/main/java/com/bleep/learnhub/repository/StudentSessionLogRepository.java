@@ -13,4 +13,8 @@ public interface StudentSessionLogRepository extends JpaRepository<StudentSessio
     @Query("SELECT COUNT(DISTINCT ssl.studentId) FROM StudentSessionLog ssl, Student s " +
            "WHERE ssl.studentId = s.id AND ssl.sessionId = :sessionId AND s.partnerId = :partnerId")
     long countDistinctStudentsBySessionIdAndPartnerId(@Param("sessionId") UUID sessionId, @Param("partnerId") UUID partnerId);
+
+    boolean existsBySessionId(UUID sessionId);
+
+    StudentSessionLog findBySessionId(UUID sessionId);
 }
