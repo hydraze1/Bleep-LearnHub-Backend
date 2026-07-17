@@ -19,4 +19,7 @@ public class CourseDataDto {
     private String category;
     private String createdAt;
     private String updatedAt;
+    
+    private boolean hasRequestedAccess;
+    private String accessStatus;
 }

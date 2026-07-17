@@ -28,4 +28,7 @@ public class PartnerAccessSessionDto {
     private String liveLink;
     private String recordedLink;
     private String resourceLink;
+
+    private boolean hasRequestedAccess;
+    private String accessStatus;
 }

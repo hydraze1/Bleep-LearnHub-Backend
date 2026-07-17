@@ -22,4 +22,7 @@ public class BatchDataDto {
     private String endingDate;
     private String createdAt;
     private String updatedAt;
+
+    private boolean hasRequestedAccess;
+    private String accessStatus;
 }

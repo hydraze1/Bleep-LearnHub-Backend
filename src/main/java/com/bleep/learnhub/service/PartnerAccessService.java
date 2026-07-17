@@ -47,13 +47,19 @@ public class PartnerAccessService {
 
     @Transactional(readOnly = true)
     public List<CourseDataDto> getCourses(UUID partnerId, String username) {
-        validateAndGetPartner(partnerId, username);
+        Partner loggedPartner = validateAndGetPartner(partnerId, username);
+        
+        // Fetch all requests for this partner to determine access status
+        List<PartnerAccessRequest> requests = accessRequestRepository.findByPartnerId(loggedPartner.getId());
+
         if (partnerId == null) {
+            // Return ALL courses (for Store) with status mapped
             return courseRepository.findAll().stream()
-                    .map(this::mapToCourseDataDto)
+                    .map(course -> mapToCourseDataDto(course, requests))
                     .collect(Collectors.toList());
         } else {
-            List<UUID> courseIds = accessRequestRepository.findByPartnerId(partnerId).stream()
+            // Return ONLY courses that have a request (for My Courses)
+            List<UUID> courseIds = requests.stream()
                     .map(PartnerAccessRequest::getCourseId)
                     .distinct()
                     .collect(Collectors.toList());
@@ -61,7 +67,7 @@ public class PartnerAccessService {
                 return List.of();
             }
             return courseRepository.findAllById(courseIds).stream()
-                    .map(this::mapToCourseDataDto)
+                    .map(course -> mapToCourseDataDto(course, requests))
                     .collect(Collectors.toList());
         }
     }
@@ -72,17 +78,17 @@ public class PartnerAccessService {
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
         String courseName = course.getTitle();
 
-        validateAndGetPartner(partnerId, username);
+        Partner loggedPartner = validateAndGetPartner(partnerId, username);
+
+        List<PartnerAccessRequest> requests = accessRequestRepository.findByPartnerId(loggedPartner.getId()).stream()
+                .filter(r -> r.getCourseId().equals(courseId))
+                .collect(Collectors.toList());
 
         if (partnerId == null) {
             return batchRepository.findByCourseId(courseId).stream()
-                    .map(batch -> mapToBatchDataDto(batch, courseName))
+                    .map(batch -> mapToBatchDataDto(batch, courseName, requests))
                     .collect(Collectors.toList());
         } else {
-            List<PartnerAccessRequest> requests = accessRequestRepository.findByPartnerId(partnerId).stream()
-                    .filter(r -> r.getCourseId().equals(courseId))
-                    .collect(Collectors.toList());
-
             if (requests.isEmpty()) {
                 return List.of();
             }
@@ -108,7 +114,7 @@ public class PartnerAccessService {
             }
 
             return batches.stream()
-                    .map(batch -> mapToBatchDataDto(batch, courseName))
+                    .map(batch -> mapToBatchDataDto(batch, courseName, requests))
                     .collect(Collectors.toList());
         }
     }
@@ -124,21 +130,19 @@ public class PartnerAccessService {
             throw new BusinessException("Batch does not belong to the specified course");
         }
 
-        validateAndGetPartner(partnerId, username);
+        Partner loggedPartner = validateAndGetPartner(partnerId, username);
 
         List<Session> sessions = sessionRepository.findByBatchIdOrderBySequenceOrderAsc(batchId);
+        List<PartnerAccessRequest> requests = accessRequestRepository.findByPartnerId(loggedPartner.getId()).stream()
+                .filter(r -> r.getCourseId().equals(courseId) && (r.getBatchId() == null || r.getBatchId().equals(batchId)))
+                .collect(Collectors.toList());
 
         if (partnerId == null) {
-            // Send sessions without links
+            // Send sessions without links (Store view)
             return sessions.stream()
-                    .map(s -> mapToPartnerAccessSessionDto(s, course.getTitle(), batch.getTitle(), false))
+                    .map(s -> mapToPartnerAccessSessionDto(s, course.getTitle(), batch.getTitle(), false, requests))
                     .collect(Collectors.toList());
         } else {
-            // Check if partner requested access to course or batch
-            List<PartnerAccessRequest> requests = accessRequestRepository.findByPartnerId(partnerId).stream()
-                    .filter(r -> r.getCourseId().equals(courseId) && (r.getBatchId() == null || r.getBatchId().equals(batchId)))
-                    .collect(Collectors.toList());
-
             if (requests.isEmpty()) {
                 // Partner has not requested access to this course or batch
                 return List.of();
@@ -148,7 +152,7 @@ public class PartnerAccessService {
             boolean isApproved = requests.stream().anyMatch(r -> r.getStatus() == AccessRequestStatus.APPROVED);
 
             return sessions.stream()
-                    .map(s -> mapToPartnerAccessSessionDto(s, course.getTitle(), batch.getTitle(), isApproved))
+                    .map(s -> mapToPartnerAccessSessionDto(s, course.getTitle(), batch.getTitle(), isApproved, requests))
                     .collect(Collectors.toList());
         }
     }
@@ -281,7 +285,11 @@ public class PartnerAccessService {
         return calendar;
     }
 
-    private CourseDataDto mapToCourseDataDto(Course course) {
+    private CourseDataDto mapToCourseDataDto(Course course, List<PartnerAccessRequest> requests) {
+        Optional<PartnerAccessRequest> matchingRequest = requests.stream()
+                .filter(r -> r.getCourseId().equals(course.getId()))
+                .findFirst(); // Since we only care if they requested it
+
         return CourseDataDto.builder()
                 .id(course.getId())
                 .title(course.getTitle())
@@ -290,10 +298,17 @@ public class PartnerAccessService {
                 .category(course.getCategory())
                 .createdAt(course.getCreatedAt() != null ? course.getCreatedAt().toString() : null)
                 .updatedAt(course.getUpdatedAt() != null ? course.getUpdatedAt().toString() : null)
+                .hasRequestedAccess(matchingRequest.isPresent())
+                .accessStatus(matchingRequest.map(r -> r.getStatus().name()).orElse(null))
                 .build();
     }
 
-    private BatchDataDto mapToBatchDataDto(Batch batch, String courseName) {
+    private BatchDataDto mapToBatchDataDto(Batch batch, String courseName, List<PartnerAccessRequest> requests) {
+        // A partner has access to a batch if they requested the specific batch, or the entire course (batchId == null)
+        Optional<PartnerAccessRequest> matchingRequest = requests.stream()
+                .filter(r -> r.getBatchId() == null || r.getBatchId().equals(batch.getId()))
+                .findFirst();
+
         return BatchDataDto.builder()
                 .id(batch.getId())
                 .courseId(batch.getCourseId())
@@ -305,10 +320,16 @@ public class PartnerAccessService {
                 .endingDate(batch.getEndingDate() != null ? batch.getEndingDate().toString() : null)
                 .createdAt(batch.getCreatedAt() != null ? batch.getCreatedAt().toString() : null)
                 .updatedAt(batch.getUpdatedAt() != null ? batch.getUpdatedAt().toString() : null)
+                .hasRequestedAccess(matchingRequest.isPresent())
+                .accessStatus(matchingRequest.map(r -> r.getStatus().name()).orElse(null))
                 .build();
     }
 
-    private PartnerAccessSessionDto mapToPartnerAccessSessionDto(Session session, String courseName, String batchName, boolean includeLinks) {
+    private PartnerAccessSessionDto mapToPartnerAccessSessionDto(Session session, String courseName, String batchName, boolean includeLinks, List<PartnerAccessRequest> requests) {
+        Optional<PartnerAccessRequest> matchingRequest = requests.stream()
+                .filter(r -> r.getBatchId() == null || r.getBatchId().equals(session.getBatchId()))
+                .findFirst();
+
         return PartnerAccessSessionDto.builder()
                 .id(session.getId())
                 .courseId(session.getCourseId())
@@ -325,6 +346,8 @@ public class PartnerAccessService {
                 .liveLink(includeLinks ? session.getLiveLink() : null)
                 .recordedLink(includeLinks ? session.getRecordedLink() : null)
                 .resourceLink(includeLinks ? session.getResourceLink() : null)
+                .hasRequestedAccess(matchingRequest.isPresent())
+                .accessStatus(matchingRequest.map(r -> r.getStatus().name()).orElse(null))
                 .build();
     }
 }
