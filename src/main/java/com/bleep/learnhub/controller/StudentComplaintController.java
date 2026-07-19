@@ -23,8 +23,8 @@ public class StudentComplaintController {
 
     private final StudentComplaintService complaintService;
 
-    // This is public
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('VENDOR', 'PARTNER')")
     public ResponseEntity<ApiResponse<Void>> createComplaint(@Valid @RequestBody ComplaintCreateDto dto) {
         complaintService.createComplaint(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -46,7 +46,7 @@ public class StudentComplaintController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('VENDOR')")
+    @PreAuthorize("hasAnyAuthority('VENDOR', 'PARTNER')")
     public ResponseEntity<ApiResponse<Void>> deleteComplaint(@PathVariable UUID id) {
         complaintService.deleteComplaint(id);
         return ResponseEntity.ok(ApiResponse.success("Complaint deleted successfully"));
