@@ -1,6 +1,8 @@
 package com.bleep.learnhub.config;
 
 import com.bleep.learnhub.security.JwtAuthenticationFilter;
+import com.bleep.learnhub.repository.ApiLogRepository;
+import com.bleep.learnhub.service.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final ApiLogRepository apiLogRepository;
+    private final RedisService redisService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -51,7 +55,8 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new ApiLoggingFilter(apiLogRepository, redisService), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(jwtAuthFilter, ApiLoggingFilter.class);
 
         return http.build();
     }

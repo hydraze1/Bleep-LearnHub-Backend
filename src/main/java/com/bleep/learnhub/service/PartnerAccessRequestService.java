@@ -66,7 +66,7 @@ public class PartnerAccessRequestService {
         // The vendor is the partner's parent vendor
         UUID vendorId = partner.getVendor().getId();
 
-        if (accessRequestRepository.existsByPartnerIdAndCourseIdAndBatchId(dto.getPartnerId(), dto.getCourseId(), dto.getBatchId())) {
+        if (accessRequestRepository.existsByPartnerIdAndCourseIdAndBatchId(partner.getId(), dto.getCourseId(), dto.getBatchId())) {
             throw new BusinessException("Partner already has an access request for this batch of the course");
         }
 

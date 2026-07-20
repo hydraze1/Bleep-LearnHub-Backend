@@ -15,6 +15,8 @@ import com.bleep.learnhub.repository.PartnerRepository;
 import com.bleep.learnhub.repository.UserRepository;
 import com.bleep.learnhub.repository.UserSessionRepository;
 import com.bleep.learnhub.repository.VendorRepository;
+import com.bleep.learnhub.exception.BusinessException;
+import com.bleep.learnhub.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,7 +45,7 @@ public class VendorService {
         log.info("VendorService: Creating vendor — username='{}', email='{}'", dto.getUsername(), dto.getEmail());
         if (userRepository.existsByUsername(dto.getUsername()) || userRepository.existsByEmail(dto.getEmail())) {
             log.warn("VendorService: Duplicate username or email — username='{}'", dto.getUsername());
-            throw new RuntimeException("Username or Email already exists");
+            throw new BusinessException("Username or Email already exists");
         }
 
         User user = User.builder()
@@ -84,7 +86,7 @@ public class VendorService {
         Vendor vendor = vendorRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("VendorService: Vendor not found — id='{}'", id);
-                    return new RuntimeException("Vendor not found with ID: " + id);
+                    return new ResourceNotFoundException("Vendor not found with ID: " + id);
                 });
         return mapToProfileResponseDto(vendor);
     }
@@ -93,7 +95,7 @@ public class VendorService {
     public void updateVendor(UUID id, VendorUpdateDto dto) {
         log.info("VendorService: Updating vendor id='{}'", id);
         Vendor vendor = vendorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vendor not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor not found with ID: " + id));
 
         vendor.setCompanyName(dto.getCompanyName());
         vendor.setPhone(dto.getPhone());
@@ -123,7 +125,7 @@ public class VendorService {
     public void deleteVendor(UUID id) {
         log.info("VendorService: Deleting vendor id='{}'", id);
         Vendor vendor = vendorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vendor not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor not found with ID: " + id));
         User vendorUser = vendor.getUser();
 
         // 1. Check if there are partners linked to this vendor
@@ -145,11 +147,11 @@ public class VendorService {
     @Transactional
     public void createPartner(String vendorUsername, PartnerCreateDto dto) {
         if (userRepository.existsByUsername(dto.getUsername()) || userRepository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Username or Email already exists");
+            throw new BusinessException("Username or Email already exists");
         }
 
         Vendor parentVendor = vendorRepository.findByUserUsername(vendorUsername)
-                .orElseThrow(() -> new RuntimeException("Vendor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor not found"));
 
         User partnerUser = User.builder()
                 .username(dto.getUsername())
@@ -173,6 +175,7 @@ public class VendorService {
         emailService.sendWelcomeEmail(dto.getEmail(), dto.getUsername(), "Partner");
     }
 
+    @Transactional(readOnly = true)
     public List<PartnerProfileResponseDto> getAllPartnersForVendor(String vendorUsername) {
         List<Partner> partners = partnerRepository.findByVendorUserUsername(vendorUsername);
 

@@ -14,6 +14,8 @@ import com.bleep.learnhub.repository.UserRepository;
 import com.bleep.learnhub.repository.UserSessionRepository;
 import com.bleep.learnhub.repository.PartnerAccessRequestRepository;
 import com.bleep.learnhub.repository.VendorRepository;
+import com.bleep.learnhub.exception.BusinessException;
+import com.bleep.learnhub.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,19 +39,19 @@ public class PartnerService {
     @Transactional
     public void createPartner(PartnerCreateDto dto, String callerUsername, boolean isSuperAdmin) {
         if (userRepository.existsByUsername(dto.getUsername()) || userRepository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Username or Email already exists");
+            throw new BusinessException("Username or Email already exists");
         }
 
         Vendor vendor;
         if (isSuperAdmin) {
             if (dto.getVendorId() == null || dto.getVendorId().isBlank()) {
-                throw new RuntimeException("Vendor ID is required for SuperAdmin to create a Partner");
+                throw new BusinessException("Vendor ID is required for SuperAdmin to create a Partner");
             }
             vendor = vendorRepository.findById(UUID.fromString(dto.getVendorId()))
-                    .orElseThrow(() -> new RuntimeException("Vendor not found with ID: " + dto.getVendorId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Vendor not found with ID: " + dto.getVendorId()));
         } else {
             vendor = vendorRepository.findByUserUsername(callerUsername)
-                    .orElseThrow(() -> new RuntimeException("Vendor profile not found for user: " + callerUsername));
+                    .orElseThrow(() -> new ResourceNotFoundException("Vendor profile not found for user: " + callerUsername));
         }
 
         User creator = userRepository.findByUsername(callerUsername).orElse(null);
@@ -94,9 +96,9 @@ public class PartnerService {
     public List<PartnerProfileResponseDto> getPartnersByVendorId(UUID vendorId, String callerUsername, boolean isSuperAdmin) {
         if (!isSuperAdmin) {
             Vendor vendor = vendorRepository.findByUserUsername(callerUsername)
-                    .orElseThrow(() -> new RuntimeException("Vendor profile not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Vendor profile not found"));
             if (!vendor.getId().equals(vendorId)) {
-                throw new RuntimeException("Access denied: Cannot access partners of another vendor");
+                throw new BusinessException("Access denied: Cannot access partners of another vendor");
             }
         }
         return partnerRepository.findByVendorId(vendorId).stream()
@@ -107,13 +109,13 @@ public class PartnerService {
     @Transactional(readOnly = true)
     public PartnerProfileResponseDto getPartnerById(UUID id, String callerUsername, boolean isSuperAdmin) {
         Partner partner = partnerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Partner not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner not found with ID: " + id));
 
         if (!isSuperAdmin) {
             Vendor vendor = vendorRepository.findByUserUsername(callerUsername)
-                    .orElseThrow(() -> new RuntimeException("Vendor profile not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Vendor profile not found"));
             if (!partner.getVendor().getId().equals(vendor.getId())) {
-                throw new RuntimeException("Access denied: This partner does not belong to your vendor account");
+                throw new BusinessException("Access denied: This partner does not belong to your vendor account");
             }
         }
         return mapToProfileResponseDto(partner);
@@ -122,13 +124,13 @@ public class PartnerService {
     @Transactional
     public void updatePartner(UUID id, PartnerUpdateDto dto, String callerUsername, boolean isSuperAdmin) {
         Partner partner = partnerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Partner not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner not found with ID: " + id));
 
         if (!isSuperAdmin) {
             Vendor vendor = vendorRepository.findByUserUsername(callerUsername)
-                    .orElseThrow(() -> new RuntimeException("Vendor profile not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Vendor profile not found"));
             if (!partner.getVendor().getId().equals(vendor.getId())) {
-                throw new RuntimeException("Access denied: This partner does not belong to your vendor account");
+                throw new BusinessException("Access denied: This partner does not belong to your vendor account");
             }
         }
 
@@ -158,13 +160,13 @@ public class PartnerService {
     @Transactional
     public void deletePartner(UUID id, String callerUsername, boolean isSuperAdmin) {
         Partner partner = partnerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Partner not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Partner not found with ID: " + id));
 
         if (!isSuperAdmin) {
             Vendor vendor = vendorRepository.findByUserUsername(callerUsername)
-                    .orElseThrow(() -> new RuntimeException("Vendor profile not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Vendor profile not found"));
             if (!partner.getVendor().getId().equals(vendor.getId())) {
-                throw new RuntimeException("Access denied: This partner does not belong to your vendor account");
+                throw new BusinessException("Access denied: This partner does not belong to your vendor account");
             }
         }
 

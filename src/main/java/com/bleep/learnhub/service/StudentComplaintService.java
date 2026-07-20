@@ -27,6 +27,12 @@ public class StudentComplaintService {
     private final VendorRepository vendorRepository;
 
     public void createComplaint(ComplaintCreateDto dto) {
+        // Resolve names once on creation so we never need extra DB queries on reads
+        String partnerName = partnerRepository.findById(dto.getPartnerId())
+                .map(Partner::getCompanyName).orElse(null);
+        String vendorName = vendorRepository.findById(dto.getVendorId())
+                .map(Vendor::getCompanyName).orElse(null);
+
         StudentComplaint complaint = StudentComplaint.builder()
                 .studentId(dto.getStudentId())
                 .partnerId(dto.getPartnerId())
@@ -41,6 +47,8 @@ public class StudentComplaintService {
                 .academicYear(dto.getAcademicYear())
                 .courseName(dto.getCourseName())
                 .batchName(dto.getBatchName())
+                .partnerName(partnerName)
+                .vendorName(vendorName)
                 .complaintTitle(dto.getComplaintTitle())
                 .complaintText(dto.getComplaintText())
                 .status(ComplaintStatus.PENDING)
@@ -121,8 +129,8 @@ public class StudentComplaintService {
                 .status(complaint.getStatus().name())
                 .vendorRemark(complaint.getVendorRemark())
                 .partnerRemark(complaint.getPartnerRemark())
-                .partnerName(partnerRepository.findById(complaint.getPartnerId()).map(Partner::getCompanyName).orElse(null))
-                .vendorName(vendorRepository.findById(complaint.getVendorId()).map(Vendor::getCompanyName).orElse(null))
+                .partnerName(complaint.getPartnerName())
+                .vendorName(complaint.getVendorName())
                 .isResolvedByVendor(complaint.getIsResolvedByVendor())
                 .isResolvedByPartner(complaint.getIsResolvedByPartner())
                 .createdAt(complaint.getCreatedAt() != null ? complaint.getCreatedAt().toString() : null)

@@ -167,4 +167,23 @@ public class RedisService {
     public void deleteOtp(String username) {
         redisTemplate.delete("otp:" + username);
     }
+
+    // ── Global API Rate Limiting ──────────────────────────────────────────────────
+    
+    private static final String API_RATE_LIMIT_PREFIX = "rate_limit:";
+    
+    /**
+     * Increments the API call count for an IP or User and returns true if allowed.
+     * @param identifier The IP address or username
+     * @param maxRequests Maximum allowed requests per window
+     * @param windowMinutes Time window in minutes
+     */
+    public boolean allowApiCall(String identifier, int maxRequests, int windowMinutes) {
+        String key = API_RATE_LIMIT_PREFIX + identifier;
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count != null && count == 1L) {
+            redisTemplate.expire(key, windowMinutes, TimeUnit.MINUTES);
+        }
+        return count == null || count <= maxRequests;
+    }
 }

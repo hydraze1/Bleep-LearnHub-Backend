@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -224,6 +225,7 @@ public class AuthController {
      * Provides a list of all users in the users table without requiring authentication.
      */
     @GetMapping({"/users", "/user-list"})
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<List<UserDataDto>>> getUserList() {
         List<UserDataDto> users = authService.getAllUsers();
         return ResponseEntity.ok(ApiResponse.success(users, "Users list retrieved successfully."));

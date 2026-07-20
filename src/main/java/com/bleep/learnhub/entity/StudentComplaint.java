@@ -70,6 +70,12 @@ public class StudentComplaint {
     @Column(name = "batch_name", length = 255)
     private String batchName;
 
+    @Column(name = "partner_name", length = 255)
+    private String partnerName;
+
+    @Column(name = "vendor_name", length = 255)
+    private String vendorName;
+
     @Column(name = "complaint_title", length = 255)
     private String complaintTitle;
 

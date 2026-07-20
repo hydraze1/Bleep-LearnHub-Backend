@@ -68,7 +68,10 @@ public class MasterLoggingFilter extends OncePerRequestFilter {
                 // Log Cookies
                 if (request.getCookies() != null) {
                     for (Cookie cookie : request.getCookies()) {
-                        log.info("🍪 Cookie: {} = {}", cookie.getName(), cookie.getValue());
+                    String maskedValue = cookie.getValue().length() > 8
+                            ? cookie.getValue().substring(0, 8) + "***[MASKED]"
+                            : "***[MASKED]";
+                        log.info("🍪 Cookie: {} = {}", cookie.getName(), maskedValue);
                     }
                 } else {
                     log.info("🍪 Cookie: None");
