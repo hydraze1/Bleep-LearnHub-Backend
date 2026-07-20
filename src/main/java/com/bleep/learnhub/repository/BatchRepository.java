@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface BatchRepository extends JpaRepository<Batch, UUID> {
     long countByCourseId(UUID courseId);
     List<Batch> findByCourseId(UUID courseId);
+    List<Batch> findByCourseIdIn(List<UUID> courseIds);
 }

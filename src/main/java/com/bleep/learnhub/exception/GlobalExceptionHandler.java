@@ -11,8 +11,10 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -101,7 +103,20 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
-    // --- 8. Fallback for all other unexpected errors (500) ---
+    // --- 8. Handle Database Constraint Violations (400) ---
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolationException(
+            DataIntegrityViolationException ex, HttpServletRequest request) {
+        
+        log.error("Database constraint violation: ", ex);
+        ApiResponse<Void> response = ApiResponse.failure(
+                "Failed to process request due to a data integrity or constraint violation. Please check your payload.",
+                "400",
+                "DATA_INTEGRITY_VIOLATION");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // --- 9. Fallback for all other unexpected errors (500) ---
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleAllOtherExceptions(
             Exception ex, HttpServletRequest request) {

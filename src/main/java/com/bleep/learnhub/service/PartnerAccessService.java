@@ -190,9 +190,7 @@ public class PartnerAccessService {
         // Find all batches from both course-level (full course access) and specific batch-level requests
         List<Batch> batches = new ArrayList<>();
         if (!courseIdsForFullAccess.isEmpty()) {
-            for (UUID courseId : courseIdsForFullAccess) {
-                batches.addAll(batchRepository.findByCourseId(courseId));
-            }
+            batches.addAll(batchRepository.findByCourseIdIn(courseIdsForFullAccess));
         }
         if (!specificBatchIds.isEmpty()) {
             batches.addAll(batchRepository.findAllById(specificBatchIds));
