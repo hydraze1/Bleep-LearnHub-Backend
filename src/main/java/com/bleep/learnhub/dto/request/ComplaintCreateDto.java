@@ -9,11 +9,12 @@ import java.util.UUID;
 
 @Data
 public class ComplaintCreateDto {
-
     private UUID studentId;
 
+    @NotNull(message = "Partner ID is required")
     private UUID partnerId;
 
+    @NotNull(message = "Vendor ID is required")
     private UUID vendorId;
 
     private UUID courseId;

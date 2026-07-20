@@ -34,10 +34,10 @@ public class StudentComplaint {
     @Column(name = "student_id")
     private UUID studentId;
 
-    @Column(name = "partner_id")
+    @Column(name = "partner_id", nullable = false)
     private UUID partnerId;
 
-    @Column(name = "vendor_id")
+    @Column(name = "vendor_id", nullable = false)
     private UUID vendorId;
 
     @Column(name = "course_id")
@@ -77,7 +77,7 @@ public class StudentComplaint {
     private String complaintText;
 
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(nullable = false)
     private ComplaintStatus status;
 
     @Column(name = "vendor_remark", columnDefinition = "TEXT")
