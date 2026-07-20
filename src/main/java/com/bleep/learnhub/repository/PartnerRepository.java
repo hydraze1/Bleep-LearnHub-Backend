@@ -20,4 +20,6 @@ public interface PartnerRepository extends JpaRepository<Partner, UUID> {
     
     // Alternatively, if you already have the Vendor's UUID
     List<Partner> findByVendorId(UUID vendorId);
+
+    long countByVendorId(UUID vendorId);
 }

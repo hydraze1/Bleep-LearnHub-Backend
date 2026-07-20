@@ -10,5 +10,7 @@ import java.util.UUID;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, UUID> {
     List<Student> findByPartnerId(UUID partnerId);
+    long countByPartnerId(UUID partnerId);
+    long countByPartnerIdIn(List<UUID> partnerIds);
     java.util.Optional<Student> findByEmail(String email);
 }

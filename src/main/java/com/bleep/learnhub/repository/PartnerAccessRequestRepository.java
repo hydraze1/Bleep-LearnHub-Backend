@@ -13,4 +13,5 @@ public interface PartnerAccessRequestRepository extends JpaRepository<PartnerAcc
     List<PartnerAccessRequest> findByPartnerId(UUID partnerId);
     boolean existsByPartnerIdAndStatus(UUID partnerId, com.bleep.learnhub.entity.enums.AccessRequestStatus status);
     boolean existsByPartnerIdAndCourseIdAndBatchId(UUID partnerId, UUID courseId, UUID batchId);
+    long countByVendorIdAndStatus(UUID vendorId, com.bleep.learnhub.entity.enums.AccessRequestStatus status);
 }

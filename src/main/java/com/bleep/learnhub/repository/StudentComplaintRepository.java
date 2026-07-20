@@ -10,5 +10,7 @@ import java.util.UUID;
 @Repository
 public interface StudentComplaintRepository extends JpaRepository<StudentComplaint, UUID> {
     List<StudentComplaint> findByVendorId(UUID vendorId);
+    List<StudentComplaint> findTop5ByVendorIdOrderByCreatedAtDesc(UUID vendorId);
     List<StudentComplaint> findByPartnerId(UUID partnerId);
+    List<StudentComplaint> findTop5ByPartnerIdOrderByCreatedAtDesc(UUID partnerId);
 }

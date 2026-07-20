@@ -3,6 +3,10 @@ package com.bleep.learnhub.controller;
 import com.bleep.learnhub.dto.StudentDataSyncRequest;
 import com.bleep.learnhub.dto.request.ComplaintCreateDto;
 import com.bleep.learnhub.dto.response.StudentDataSyncResponseDto;
+import com.bleep.learnhub.service.CourseService;
+import com.bleep.learnhub.service.BatchService;
+import com.bleep.learnhub.dto.response.CourseDataDto;
+import com.bleep.learnhub.dto.response.BatchDataDto;
 import com.bleep.learnhub.service.StudentComplaintService;
 import com.bleep.learnhub.service.StudentDataSyncService;
 import jakarta.validation.Valid;
@@ -11,6 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/open/sync")
 @RequiredArgsConstructor
@@ -18,6 +25,8 @@ public class OpenDataSyncController {
 
     private final StudentDataSyncService studentDataSyncService;
     private final StudentComplaintService studentComplaintService;
+    private final CourseService courseService;
+    private final BatchService batchService;
 
     @PostMapping("/student-data")
     public ResponseEntity<com.bleep.learnhub.dto.response.ApiResponse<StudentDataSyncResponseDto>> syncStudentData(@RequestBody StudentDataSyncRequest request) {
@@ -30,5 +39,17 @@ public class OpenDataSyncController {
         studentComplaintService.createComplaint(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(com.bleep.learnhub.dto.response.ApiResponse.success("Complaint submitted successfully"));
+    }
+
+    @GetMapping("/courses")
+    public ResponseEntity<com.bleep.learnhub.dto.response.ApiResponse<List<CourseDataDto>>> getCourses() {
+        List<CourseDataDto> courses = courseService.getAllCourses();
+        return ResponseEntity.ok(com.bleep.learnhub.dto.response.ApiResponse.success(courses, "Courses retrieved successfully"));
+    }
+
+    @GetMapping("/courses/{courseId}/batches")
+    public ResponseEntity<com.bleep.learnhub.dto.response.ApiResponse<List<BatchDataDto>>> getBatchesByCourse(@PathVariable UUID courseId) {
+        List<BatchDataDto> batches = batchService.getBatchesByCourseId(courseId);
+        return ResponseEntity.ok(com.bleep.learnhub.dto.response.ApiResponse.success(batches, "Batches retrieved successfully"));
     }
 }
