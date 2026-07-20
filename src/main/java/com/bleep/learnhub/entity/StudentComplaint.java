@@ -31,25 +31,25 @@ public class StudentComplaint {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "student_id", nullable = false)
+    @Column(name = "student_id")
     private UUID studentId;
 
-    @Column(name = "partner_id", nullable = false)
+    @Column(name = "partner_id")
     private UUID partnerId;
 
-    @Column(name = "vendor_id", nullable = false)
+    @Column(name = "vendor_id")
     private UUID vendorId;
 
-    @Column(name = "course_id", nullable = false)
+    @Column(name = "course_id")
     private UUID courseId;
 
-    @Column(name = "batch_id", nullable = false)
+    @Column(name = "batch_id")
     private UUID batchId;
 
-    @Column(name = "student_name", nullable = false, length = 255)
+    @Column(name = "student_name", length = 255)
     private String studentName;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)
     private String email;
 
     @Column(name = "phone_number", length = 20)
@@ -64,20 +64,20 @@ public class StudentComplaint {
     @Column(name = "academic_year", length = 50)
     private String academicYear;
 
-    @Column(name = "course_name", nullable = false, length = 255)
+    @Column(name = "course_name", length = 255)
     private String courseName;
 
-    @Column(name = "batch_name", nullable = false, length = 255)
+    @Column(name = "batch_name", length = 255)
     private String batchName;
 
-    @Column(name = "complaint_title", nullable = false, length = 255)
+    @Column(name = "complaint_title", length = 255)
     private String complaintTitle;
 
-    @Column(name = "complaint_text", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "complaint_text", columnDefinition = "TEXT")
     private String complaintText;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private ComplaintStatus status;
 
     @Column(name = "vendor_remark", columnDefinition = "TEXT")
@@ -85,6 +85,12 @@ public class StudentComplaint {
 
     @Column(name = "partner_remark", columnDefinition = "TEXT")
     private String partnerRemark;
+
+    @Column(name = "is_resolved_by_vendor")
+    private Boolean isResolvedByVendor = false;
+
+    @Column(name = "is_resolved_by_partner")
+    private Boolean isResolvedByPartner = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

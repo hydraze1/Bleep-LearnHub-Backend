@@ -1,9 +1,13 @@
 package com.bleep.learnhub.controller;
 
 import com.bleep.learnhub.dto.StudentDataSyncRequest;
+import com.bleep.learnhub.dto.request.ComplaintCreateDto;
 import com.bleep.learnhub.dto.response.StudentDataSyncResponseDto;
+import com.bleep.learnhub.service.StudentComplaintService;
 import com.bleep.learnhub.service.StudentDataSyncService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,10 +17,18 @@ import org.springframework.web.bind.annotation.*;
 public class OpenDataSyncController {
 
     private final StudentDataSyncService studentDataSyncService;
+    private final StudentComplaintService studentComplaintService;
 
     @PostMapping("/student-data")
     public ResponseEntity<com.bleep.learnhub.dto.response.ApiResponse<StudentDataSyncResponseDto>> syncStudentData(@RequestBody StudentDataSyncRequest request) {
         StudentDataSyncResponseDto response = studentDataSyncService.syncStudentData(request);
         return ResponseEntity.ok(com.bleep.learnhub.dto.response.ApiResponse.success(response, "Student data synced successfully"));
+    }
+
+    @PostMapping("/complaints")
+    public ResponseEntity<com.bleep.learnhub.dto.response.ApiResponse<Void>> createComplaint(@Valid @RequestBody ComplaintCreateDto dto) {
+        studentComplaintService.createComplaint(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(com.bleep.learnhub.dto.response.ApiResponse.success("Complaint submitted successfully"));
     }
 }

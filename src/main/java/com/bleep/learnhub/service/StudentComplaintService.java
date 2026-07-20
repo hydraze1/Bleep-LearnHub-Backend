@@ -3,10 +3,14 @@ package com.bleep.learnhub.service;
 import com.bleep.learnhub.dto.request.ComplaintCreateDto;
 import com.bleep.learnhub.dto.request.ComplaintUpdateDto;
 import com.bleep.learnhub.dto.response.ComplaintResponseDto;
+import com.bleep.learnhub.entity.Partner;
 import com.bleep.learnhub.entity.StudentComplaint;
+import com.bleep.learnhub.entity.Vendor;
 import com.bleep.learnhub.entity.enums.ComplaintStatus;
 import com.bleep.learnhub.exception.ResourceNotFoundException;
+import com.bleep.learnhub.repository.PartnerRepository;
 import com.bleep.learnhub.repository.StudentComplaintRepository;
+import com.bleep.learnhub.repository.VendorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +23,8 @@ import java.util.stream.Collectors;
 public class StudentComplaintService {
 
     private final StudentComplaintRepository complaintRepository;
+    private final PartnerRepository partnerRepository;
+    private final VendorRepository vendorRepository;
 
     public void createComplaint(ComplaintCreateDto dto) {
         StudentComplaint complaint = StudentComplaint.builder()
@@ -47,7 +53,17 @@ public class StudentComplaintService {
         StudentComplaint complaint = complaintRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Complaint not found with id: " + id));
 
-        complaint.setStatus(dto.getStatus());
+        if (dto.getStatus() != null) {
+            if (dto.getStatus() == ComplaintStatus.RESOLVED && complaint.getStatus() != ComplaintStatus.RESOLVED) {
+                if (isVendor) {
+                    complaint.setIsResolvedByVendor(true);
+                }
+                if (isPartner) {
+                    complaint.setIsResolvedByPartner(true);
+                }
+            }
+            complaint.setStatus(dto.getStatus());
+        }
 
         if (isVendor && dto.getVendorRemark() != null) {
             complaint.setVendorRemark(dto.getVendorRemark());
@@ -105,6 +121,10 @@ public class StudentComplaintService {
                 .status(complaint.getStatus().name())
                 .vendorRemark(complaint.getVendorRemark())
                 .partnerRemark(complaint.getPartnerRemark())
+                .partnerName(partnerRepository.findById(complaint.getPartnerId()).map(Partner::getCompanyName).orElse(null))
+                .vendorName(vendorRepository.findById(complaint.getVendorId()).map(Vendor::getCompanyName).orElse(null))
+                .isResolvedByVendor(complaint.getIsResolvedByVendor())
+                .isResolvedByPartner(complaint.getIsResolvedByPartner())
                 .createdAt(complaint.getCreatedAt() != null ? complaint.getCreatedAt().toString() : null)
                 .updatedAt(complaint.getUpdatedAt() != null ? complaint.getUpdatedAt().toString() : null)
                 .build();

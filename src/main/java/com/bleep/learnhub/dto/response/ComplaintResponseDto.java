@@ -31,6 +31,10 @@ public class ComplaintResponseDto {
     private String status;
     private String vendorRemark;
     private String partnerRemark;
+    private String partnerName;
+    private String vendorName;
+    private Boolean isResolvedByVendor;
+    private Boolean isResolvedByPartner;
     private String createdAt;
     private String updatedAt;
 }
