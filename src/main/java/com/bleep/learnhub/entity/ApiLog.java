@@ -34,7 +34,7 @@ public class ApiLog {
     private String ipAddress;
 
     // --- Request Details ---
-    @Column(length = 255, nullable = false)
+    @Column(name = "api_url", length = 255, nullable = false)
     private String url;
 
     @Column(length = 10, nullable = false)

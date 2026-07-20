@@ -129,7 +129,7 @@ public class DashboardController {
             throw new BusinessException("Access denied: You can only view your own profile");
         }
 
-        PartnerProfileResponseDto partner = partnerService.getPartnerById(partnerId, authentication.getName(), false);
+        PartnerProfileResponseDto partner = partnerService.getPartnerById(partnerId, authentication.getName(), true);
         return ResponseEntity.ok(ApiResponse.success(partner, "Partner profile retrieved successfully."));
     }
 
@@ -148,7 +148,7 @@ public class DashboardController {
             throw new BusinessException("Access denied: You can only update your own profile");
         }
 
-        partnerService.updatePartner(partnerId, dto, authentication.getName(), false);
+        partnerService.updatePartner(partnerId, dto, authentication.getName(), true);
         return ResponseEntity.ok(ApiResponse.success("Partner profile updated successfully."));
     }
 }
