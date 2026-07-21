@@ -11,7 +11,7 @@
 # VM_IP="200.97.175.94"                    # The public IP address of your VM
 
 # # PostgreSQL Settings
-# POSTGRES_USER="bleepUser"                  # The database username your Java app will use
+# POSTGRES_USER="bleepuser"                  # The database username your Java app will use
 # POSTGRES_PASSWORD="bleepLearnhub8795346"   # The database password
 # POSTGRES_DB_PROD="learnhub_db"             # The main production database
 # POSTGRES_DB_STAGING="learnhub_db_staging"  # The staging database for testing
