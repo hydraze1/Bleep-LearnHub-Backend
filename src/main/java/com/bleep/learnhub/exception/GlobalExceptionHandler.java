@@ -60,13 +60,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    // --- 4. Handle Bad Login Credentials (401) ---
+    // --- 4. Handle Bad Login Credentials (400) ---
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Void>> handleBadCredentials(
             BadCredentialsException ex, HttpServletRequest request) {
         
-        ApiResponse<Void> response = ApiResponse.failure("Invalid username or password", "401", "BAD_CREDENTIALS");
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        ApiResponse<Void> response = ApiResponse.failure("Invalid username or password", "400", "BAD_CREDENTIALS");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     // --- 5. Handle Disabled Account (PENDING_SETUP tries to login) ---
