@@ -33,7 +33,7 @@ echo "✅ Local files verified."
 # 3. PRE-FLIGHT REMOTE CHECKS
 # ==========================================================
 echo "🔍 Checking SSH connection to $VM_IP..."
-if ! ssh -q -o BatchMode=yes -o ConnectTimeout=5 "$VM_USER@$VM_IP" "echo 'SSH successful'"; then
+if ! ssh -o BatchMode=yes -o ConnectTimeout=5 "$VM_USER@$VM_IP" "echo 'SSH successful'"; then
     echo "❌ ERROR: Cannot connect to VM. Check your VPN, IP, or SSH keys."
     exit 1
 fi
@@ -46,10 +46,10 @@ ssh "$VM_USER@$VM_IP" "mkdir -p $REMOTE_DIR"
 # ==========================================================
 echo "📦 Packaging deployment files..."
 rm -f "$ZIP_NAME"
-zip -q "$ZIP_NAME" "$TAR_GZ_FILE" "$COMPOSE_FILE"
+zip "$ZIP_NAME" "$TAR_GZ_FILE" "$COMPOSE_FILE"
 
 echo "🚚 Transferring $ZIP_NAME to VM..."
-scp -q "$ZIP_NAME" "$VM_USER@$VM_IP:~/"
+scp "$ZIP_NAME" "$VM_USER@$VM_IP:~/"
 
 # ==========================================================
 # 5. REMOTE EXECUTION (THE SAFE DEPLOYMENT ROUTINE)
@@ -61,7 +61,7 @@ ssh "$VM_USER@$VM_IP" << EOF
     set -e
 
     echo "--> [1/7] Unzipping new files..."
-    unzip -q -o ~/$ZIP_NAME -d $REMOTE_DIR
+    unzip -o ~/$ZIP_NAME -d $REMOTE_DIR
     rm -f ~/$ZIP_NAME
 
     cd $REMOTE_DIR
@@ -106,7 +106,7 @@ EOF
 # ==========================================================
 # 6. LOCAL CLEANUP
 # ==========================================================
-rm -f "$ZIP_NAME"
+rm -f "$ZIP_NAME" "$TAR_GZ_FILE" "${IMAGE_NAME}-${IMAGE_TAG}.tar"
 
 echo "------------------------------------------------------"
 echo "✨ Deployment successfully completed with zero downtime overlap!"
