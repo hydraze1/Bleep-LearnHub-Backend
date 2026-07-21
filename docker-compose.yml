@@ -1,0 +1,74 @@
+version: "3.8"
+
+services:
+  # ── 1. Spring Boot Application ──────────────────────────────────────────────
+  app:
+    image: bleep-learnhub-backend:latest
+    container_name: bleep-learnhub-backend
+    restart: unless-stopped
+    # This maps 'host.docker.internal' to your VM's IP address
+    ports:
+      # Map port 8080 on your VM to port 8080 inside the container
+      - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      # General Config
+      - SPRING_APPLICATION_NAME=bleep-learnhub-backend
+      - SERVER_SERVLET_CONTEXT_PATH=/bleep-learnhub-backend/api/v1
+      - APP_LOGGING_VERBOSE=false
+
+      # PostgreSQL Database Config (Connecting to host VM on port 5432)
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/learnhub_db_staging
+      - SPRING_DATASOURCE_USERNAME=bleepuser
+      - SPRING_DATASOURCE_PASSWORD=bleepLearnhub8795346
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # - SPRING_JPA_SHOW_SQL=true
+      # - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SPRING_JPA_SHOW_SQL=false
+
+      # Redis Config (Connecting to host VM on port 6380)
+      - SPRING_DATA_REDIS_HOST=host.docker.internal
+      - SPRING_DATA_REDIS_PORT=6380
+      - SPRING_DATA_REDIS_PASSWORD=bleepLearnhub8795346
+      - SPRING_DATA_REDIS_DATABASE=1
+      # - SPRING_DATA_REDIS_DATABASE=0
+
+      # Mail SMTP Config
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=niladrimajumder272001@gmail.com
+      - SPRING_MAIL_PASSWORD=frbcqahykuqewbin
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED=true
+      - SPRING_MAIL_PROPERTIES_MAIL_TRANSPORT_PROTOCOL=smtp
+      # - SPRING_MAIL_PROPERTIES_MAIL_DEBUG=true
+      - SPRING_MAIL_PROPERTIES_MAIL_DEBUG=false
+
+      # Security & JWT
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=U2VjdXJlS2V5Rm9yQmxjZXBMZWFybkh1YkJhY2tlbmRXaXRoU3VmZmljaWVudExlbmd0aE9mQnl0ZXM=
+      - APPLICATION_SECURITY_JWT_EXPIRATION=86400000
+
+      # Rate Limits
+      - APP_API_RATE_LIMIT_MAX_REQUESTS=200
+      - APP_API_RATE_LIMIT_TIME_FRAME_MINUTES=1
+      - APP_OTP_MAX_REQUESTS=5
+      - APP_OTP_TIME_FRAME_MINUTES=30
+
+      # Admin Seeder
+      - APP_ADMIN_USERNAME=admin
+      - APP_ADMIN_EMAIL=adminbleeplearnhubnilabhi@yopmail.com
+      - APP_ADMIN_PASSWORD=BleepLearnHubNilAbhi@123
+
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.bleep-backend.rule=PathPrefix(`/bleep-learnhub-backend`)"
+    #   - "traefik.http.routers.bleep-backend.entrypoints=web,websecure"
+    #   - "traefik.http.services.bleep-backend.loadbalancer.server.port=8080"
+#     networks:
+#       - web-network
+
+# networks:
+#   web-network:
+#     external: true

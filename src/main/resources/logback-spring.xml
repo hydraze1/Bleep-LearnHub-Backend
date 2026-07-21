@@ -28,25 +28,33 @@
         </layout>
     </appender>
 
+    <!-- Load app.logging.verbose from application.properties -->
+    <springProperty scope="context" name="appLoggingVerbose" source="app.logging.verbose" defaultValue="false"/>
+
     <!-- ── Rolling File Appender ──────────────────────────────────────── -->
     <!--
         Creates a new archive daily OR when the file hits 10 MB.
         Active file : ./logs/application.log
         Archives    : ./logs/archived/app-YYYY-MM-DD.0.log
         Keeps 30 days / max 1 GB total.
+        Conditionally created only if app.logging.verbose is true to avoid creating the log file.
     -->
-    <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS}/application.log</file>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>${LOG_PATTERN}</Pattern>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS}/archived/app-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>10MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
-        </rollingPolicy>
-    </appender>
+    <if condition='property("appLoggingVerbose").equals("true")'>
+        <then>
+            <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${LOGS}/application.log</file>
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <Pattern>${LOG_PATTERN}</Pattern>
+                </encoder>
+                <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                    <fileNamePattern>${LOGS}/archived/app-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                    <maxFileSize>10MB</maxFileSize>
+                    <maxHistory>30</maxHistory>
+                    <totalSizeCap>1GB</totalSizeCap>
+                </rollingPolicy>
+            </appender>
+        </then>
+    </if>
 
     <!-- ── Per-package log levels ─────────────────────────────────────── -->
 
@@ -65,7 +73,11 @@
     <!-- ── Root ───────────────────────────────────────────────────────── -->
     <root level="info">
         <appender-ref ref="Console" />
-        <appender-ref ref="RollingFile" />
+        <if condition='property("appLoggingVerbose").equals("true")'>
+            <then>
+                <appender-ref ref="RollingFile" />
+            </then>
+        </if>
     </root>
 
 </configuration>

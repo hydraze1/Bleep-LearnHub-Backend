@@ -3,7 +3,8 @@
 ## config
 
 ### AdminSeeder.java
-```java
+
+````java
 public class AdminSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -639,7 +640,7 @@ public class PartnerProfileResponseDto {
     private String companyName;
     private String phone;
     private String description;
-    private String parentVendorId; 
+    private String parentVendorId;
     private String parentVendorCompanyName;
     private boolean isActive;
 ``n
@@ -879,7 +880,7 @@ public class Session {
 ```java
 public class Student {
     private UUID id;
-    private UUID partnerId; 
+    private UUID partnerId;
     private String firstName;
     private String lastName;
     private String fullName;
@@ -1400,7 +1401,7 @@ app.logging.verbose=true
 # spring.datasource.url=jdbc:postgresql://db:5432/learnhub_db
 # spring.datasource.username=myuser
 # spring.datasource.password=mypassword
-spring.datasource.url=jdbc:postgresql://localhost:5433/learnhub_db
+spring.datasource.url=jdbc:postgresql://localhost:5432/learnhub_db
 spring.datasource.username=myuser
 spring.datasource.password=mypassword
 
@@ -1457,3 +1458,4 @@ app.admin.email=adminbleepdemo@yopmail.com
 app.admin.password=Admin@123
 ``n
 
+````

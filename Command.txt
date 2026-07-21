@@ -20,6 +20,46 @@ OpenAPI Specs (JSON): http://localhost:8080/bleep-learnhub-backend/api/v1/v3/api
 
 https://docmedhos.develeganceinnovatech.in/adtApi/swagger-ui/index.html#/Admission/admitPatient
 
+
+
+sudo ufw allow ssh
+
+
+
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+
+
+sudo ufw allow from 172.16.0.0/12 to any port 5432
+sudo ufw allow from 172.16.0.0/12 to any port 6380
+
+
+sudo ufw enable
+
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere                  
+80/tcp                     ALLOW IN    Anywhere                  
+443/tcp                    ALLOW IN    Anywhere                  
+5432                       ALLOW IN    172.16.0.0/12             
+6380                       ALLOW IN    172.16.0.0/12             
+22/tcp (v6)                ALLOW IN    Anywhere (v6)             
+80/tcp (v6)                ALLOW IN    Anywhere (v6)             
+443/tcp (v6)               ALLOW IN    Anywhere (v6)  
+
+
+
+
+
+http://200.97.175.94:8080/bleep-learnhub-backend/api/v1/swagger-ui/index.html
+
+
+
+
+
+
 hydraze1@hydraze1-Nitro:~/Desktop/code/github/ADT-UI/src/hooks$ ls
 
 AdtApi  ApiUrls.ts  CSNOserv  CredentialApi  DrugApi  Icd10Api  LabApi  MasterApi  OrderApi  PatientApi
