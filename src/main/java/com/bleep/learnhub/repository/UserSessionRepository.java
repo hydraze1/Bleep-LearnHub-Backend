@@ -2,6 +2,7 @@ package com.bleep.learnhub.repository;
 
 import com.bleep.learnhub.entity.UserSession;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface UserSessionRepository extends JpaRepository<UserSession, UUID> {
+public interface UserSessionRepository extends JpaRepository<UserSession, UUID>, JpaSpecificationExecutor<UserSession> {
 
     // Used to link a specific JWT token (JTI claim) to its database audit record
     Optional<UserSession> findBySessionId(String sessionId);
