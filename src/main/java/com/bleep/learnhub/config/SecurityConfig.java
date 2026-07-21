@@ -36,6 +36,12 @@ public class SecurityConfig {
     private final ApiLogRepository apiLogRepository;
     private final RedisService redisService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.api.rate-limit.max-requests:200}")
+    private int rateLimitMaxRequests;
+
+    @org.springframework.beans.factory.annotation.Value("${app.api.rate-limit.time-frame-minutes:1}")
+    private int rateLimitTimeFrameMinutes;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -55,7 +61,7 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(new ApiLoggingFilter(apiLogRepository, redisService), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new ApiLoggingFilter(apiLogRepository, redisService, rateLimitMaxRequests, rateLimitTimeFrameMinutes), UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(jwtAuthFilter, ApiLoggingFilter.class);
 
         return http.build();

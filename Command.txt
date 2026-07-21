@@ -91,3 +91,12 @@ another apis shedule or calender api
 thet will return data the user will send from date and to date and in edsponse will return in what day what session is there and session data that must cntain al session data and course and batch name too with course and batch id  
 
 create a seperate controller for this and create a plan with what each api url request body and response body and and validation 
+
+
+
+
+
+
+
+
+now go through every apis controller congif and repository ,. dto , entity enum , exceptionand repository security and service and check if every thisng is ok any code that might caouse error or problem later every escept of this project evry part table api logic evry thing is handeled properly everything and fix issue if ther s any 

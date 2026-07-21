@@ -28,6 +28,8 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
 
     private final ApiLogRepository apiLogRepository;
     private final RedisService redisService;
+    private final int rateLimitMaxRequests;
+    private final int rateLimitTimeFrameMinutes;
     
     // Use an executor to save logs asynchronously so it doesn't block the API response
     private final ExecutorService logExecutor = Executors.newSingleThreadExecutor();
@@ -46,8 +48,7 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
         String ipAddress = request.getRemoteAddr();
         
         // ── 1. RATE LIMITING ──
-        // Allow max 200 requests per minute per IP
-        if (!redisService.allowApiCall(ipAddress, 200, 1)) {
+        if (!redisService.allowApiCall(ipAddress, rateLimitMaxRequests, rateLimitTimeFrameMinutes)) {
             response.setStatus(429); // Too Many Requests
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"429\", \"message\": \"Too Many Requests. Please slow down.\"}");
