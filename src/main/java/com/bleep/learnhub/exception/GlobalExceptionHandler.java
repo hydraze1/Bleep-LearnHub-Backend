@@ -1,0 +1,129 @@
+package com.bleep.learnhub.exception;
+
+import com.bleep.learnhub.dto.response.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.dao.DataIntegrityViolationException;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    // --- 1. Handle DTO Validation Errors (@NotBlank, @Email, etc.) ---
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
+        
+        // Extract the specific fields that failed validation and their messages
+        Map<String, String> validationErrors = new HashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            validationErrors.put(error.getField(), error.getDefaultMessage());
+        }
+
+        ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
+                .message("Validation Failed")
+                .error("400")
+                .errorCode("VALIDATION_ERROR")
+                .data(validationErrors)
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // --- 2. Handle Missing Resources (404) ---
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(
+            ResourceNotFoundException ex, HttpServletRequest request) {
+        
+        ApiResponse<Void> response = ApiResponse.failure(ex.getMessage(), "404", "RESOURCE_NOT_FOUND");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    // --- 3. Handle Business Rule Violations (400) ---
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(
+            BusinessException ex, HttpServletRequest request) {
+        
+        ApiResponse<Void> response = ApiResponse.failure(ex.getMessage(), "400", "BUSINESS_RULE_VIOLATION");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // --- 4. Handle Bad Login Credentials (400) ---
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBadCredentials(
+            BadCredentialsException ex, HttpServletRequest request) {
+        
+        ApiResponse<Void> response = ApiResponse.failure("Invalid username or password", "400", "BAD_CREDENTIALS");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // --- 5. Handle Disabled Account (PENDING_SETUP tries to login) ---
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDisabledException(
+            DisabledException ex, HttpServletRequest request) {
+        
+        ApiResponse<Void> response = ApiResponse.failure(
+                "Account setup is not complete. Please use 'send-otp' to set your password first.",
+                "403",
+                "ACCOUNT_NOT_ACTIVE");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    // --- 6. Handle Locked Account (BLOCKED user tries to login) ---
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleLockedException(
+            LockedException ex, HttpServletRequest request) {
+        
+        ApiResponse<Void> response = ApiResponse.failure(
+                "Your account has been blocked. Please contact support.",
+                "403",
+                "ACCOUNT_BLOCKED");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    // --- 7. Handle Role/Permission Denials (403) ---
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(
+            AccessDeniedException ex, HttpServletRequest request) {
+        
+        ApiResponse<Void> response = ApiResponse.failure("You do not have permission to access this resource", "403", "ACCESS_DENIED");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    // --- 8. Handle Database Constraint Violations (400) ---
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolationException(
+            DataIntegrityViolationException ex, HttpServletRequest request) {
+        
+        log.error("Database constraint violation: ", ex);
+        ApiResponse<Void> response = ApiResponse.failure(
+                "Failed to process request due to a data integrity or constraint violation. Please check your payload.",
+                "400",
+                "DATA_INTEGRITY_VIOLATION");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // --- 9. Fallback for all other unexpected errors (500) ---
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleAllOtherExceptions(
+            Exception ex, HttpServletRequest request) {
+        
+        // Log the actual error so the developer can fix it, but hide the stack trace from the user
+        log.error("Unhandled exception caught: ", ex);
+
+        ApiResponse<Void> response = ApiResponse.failure("An unexpected internal server error occurred", "500", "INTERNAL_SERVER_ERROR");
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}

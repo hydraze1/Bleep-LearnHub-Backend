@@ -1,0 +1,18 @@
+package com.bleep.learnhub.repository;
+
+import com.bleep.learnhub.entity.PartnerAccessRequest;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.UUID;
+
+@Repository
+public interface PartnerAccessRequestRepository extends JpaRepository<PartnerAccessRequest, UUID>, JpaSpecificationExecutor<PartnerAccessRequest> {
+    List<PartnerAccessRequest> findByVendorId(UUID vendorId);
+    List<PartnerAccessRequest> findByPartnerId(UUID partnerId);
+    boolean existsByPartnerIdAndStatus(UUID partnerId, com.bleep.learnhub.entity.enums.AccessRequestStatus status);
+    boolean existsByPartnerIdAndCourseIdAndBatchId(UUID partnerId, UUID courseId, UUID batchId);
+    long countByVendorIdAndStatus(UUID vendorId, com.bleep.learnhub.entity.enums.AccessRequestStatus status);
+}

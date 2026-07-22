@@ -1,0 +1,20 @@
+# Ignore database volumes and local configs
+dockerStorageConfigs/
+
+# Ignore local logs
+logs/
+
+# Ignore compiled artifacts (we build inside the Dockerfile anyway)
+target/
+
+# Ignore git history
+.git/
+.gitignore
+
+# Ignore IDE configs
+.vscode/
+
+# Ignore local deploy archives
+*.tar
+*.tar.gz
+*.zip

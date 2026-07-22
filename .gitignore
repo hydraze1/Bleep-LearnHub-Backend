@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+logs/
+*.log
+
+dockerStorageConfigs/volume-data/
+
+### Build Artifacts ###
+*.tar
+*.tar.gz
+*.zip
