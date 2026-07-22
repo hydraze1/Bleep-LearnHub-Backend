@@ -54,7 +54,7 @@ public class MasterDataController {
     // --- PartnerAccessRequest ---
     @GetMapping("/partner-access-requests")
     public ResponseEntity<ApiResponse<Page<PartnerAccessRequest>>> getAllPartnerAccessRequests(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int size, @RequestParam(required = false) String search) {
-        return ResponseEntity.ok(ApiResponse.success(masterDataService.getAllPartnerAccessRequests(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")), search), "PartnerAccessRequests retrieved successfully"));
+        return ResponseEntity.ok(ApiResponse.success(masterDataService.getAllPartnerAccessRequests(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestedAt")), search), "PartnerAccessRequests retrieved successfully"));
     }
     @DeleteMapping("/partner-access-requests/{id}")
     public ResponseEntity<ApiResponse<Void>> deletePartnerAccessRequest(@PathVariable UUID id) { masterDataService.deletePartnerAccessRequest(id); return ResponseEntity.ok(ApiResponse.success("PartnerAccessRequest deleted successfully")); }
@@ -94,7 +94,7 @@ public class MasterDataController {
     // --- StudentEnrollment ---
     @GetMapping("/student-enrollments")
     public ResponseEntity<ApiResponse<Page<StudentEnrollment>>> getAllStudentEnrollments(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int size, @RequestParam(required = false) String search) {
-        return ResponseEntity.ok(ApiResponse.success(masterDataService.getAllStudentEnrollments(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")), search), "StudentEnrollments retrieved successfully"));
+        return ResponseEntity.ok(ApiResponse.success(masterDataService.getAllStudentEnrollments(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "enrolledAt")), search), "StudentEnrollments retrieved successfully"));
     }
     @DeleteMapping("/student-enrollments/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteStudentEnrollment(@PathVariable UUID id) { masterDataService.deleteStudentEnrollment(id); return ResponseEntity.ok(ApiResponse.success("StudentEnrollment deleted successfully")); }
