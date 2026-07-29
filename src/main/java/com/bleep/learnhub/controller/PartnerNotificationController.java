@@ -15,7 +15,7 @@ import java.security.Principal;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/partners/notifications")
+@RequestMapping("/partners/notifications")
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('PARTNER')")
 public class PartnerNotificationController {

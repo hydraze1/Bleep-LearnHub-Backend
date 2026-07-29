@@ -5,11 +5,14 @@ import com.bleep.learnhub.dto.response.CourseDataDto;
 import com.bleep.learnhub.dto.response.PartnerAccessSessionDto;
 import com.bleep.learnhub.dto.response.PartnerCalendarDayDto;
 import com.bleep.learnhub.dto.response.PartnerCalendarSessionDto;
+import com.bleep.learnhub.dto.response.PartnerStudentResponseDto;
 import com.bleep.learnhub.entity.Course;
 import com.bleep.learnhub.entity.Batch;
 import com.bleep.learnhub.entity.Session;
 import com.bleep.learnhub.entity.Partner;
 import com.bleep.learnhub.entity.PartnerAccessRequest;
+import com.bleep.learnhub.entity.Student;
+import com.bleep.learnhub.entity.StudentEnrollment;
 import com.bleep.learnhub.entity.enums.AccessRequestStatus;
 import com.bleep.learnhub.exception.BusinessException;
 import com.bleep.learnhub.exception.ResourceNotFoundException;
@@ -18,6 +21,9 @@ import com.bleep.learnhub.repository.BatchRepository;
 import com.bleep.learnhub.repository.SessionRepository;
 import com.bleep.learnhub.repository.PartnerRepository;
 import com.bleep.learnhub.repository.PartnerAccessRequestRepository;
+import com.bleep.learnhub.repository.StudentRepository;
+import com.bleep.learnhub.repository.StudentEnrollmentRepository;
+import com.bleep.learnhub.repository.StudentSessionLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +41,9 @@ public class PartnerAccessService {
     private final CourseRepository courseRepository;
     private final BatchRepository batchRepository;
     private final SessionRepository sessionRepository;
+    private final StudentRepository studentRepository;
+    private final StudentEnrollmentRepository studentEnrollmentRepository;
+    private final StudentSessionLogRepository studentSessionLogRepository;
 
     private Partner validateAndGetPartner(UUID partnerId, String username) {
         Partner partner = partnerRepository.findByUserUsername(username)
@@ -48,7 +57,7 @@ public class PartnerAccessService {
     @Transactional(readOnly = true)
     public List<CourseDataDto> getCourses(UUID partnerId, String username) {
         Partner loggedPartner = validateAndGetPartner(partnerId, username);
-        
+
         // Fetch all requests for this partner to determine access status
         List<PartnerAccessRequest> requests = accessRequestRepository.findByPartnerId(loggedPartner.getId());
 
@@ -134,7 +143,8 @@ public class PartnerAccessService {
 
         List<Session> sessions = sessionRepository.findByBatchIdOrderBySequenceOrderAsc(batchId);
         List<PartnerAccessRequest> requests = accessRequestRepository.findByPartnerId(loggedPartner.getId()).stream()
-                .filter(r -> r.getCourseId().equals(courseId) && (r.getBatchId() == null || r.getBatchId().equals(batchId)))
+                .filter(r -> r.getCourseId().equals(courseId)
+                        && (r.getBatchId() == null || r.getBatchId().equals(batchId)))
                 .collect(Collectors.toList());
 
         if (partnerId == null) {
@@ -152,13 +162,15 @@ public class PartnerAccessService {
             boolean isApproved = requests.stream().anyMatch(r -> r.getStatus() == AccessRequestStatus.APPROVED);
 
             return sessions.stream()
-                    .map(s -> mapToPartnerAccessSessionDto(s, course.getTitle(), batch.getTitle(), isApproved, requests))
+                    .map(s -> mapToPartnerAccessSessionDto(s, course.getTitle(), batch.getTitle(), isApproved,
+                            requests))
                     .collect(Collectors.toList());
         }
     }
 
     @Transactional(readOnly = true)
-    public List<PartnerCalendarDayDto> getSchedule(LocalDate fromDate, LocalDate toDate, UUID partnerId, String username) {
+    public List<PartnerCalendarDayDto> getSchedule(LocalDate fromDate, LocalDate toDate, UUID partnerId,
+            String username) {
         if (fromDate == null || toDate == null || partnerId == null) {
             throw new BusinessException("All parameters (fromDate, toDate, partnerId) are required");
         }
@@ -187,7 +199,8 @@ public class PartnerAccessService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        // Find all batches from both course-level (full course access) and specific batch-level requests
+        // Find all batches from both course-level (full course access) and specific
+        // batch-level requests
         List<Batch> batches = new ArrayList<>();
         if (!courseIdsForFullAccess.isEmpty()) {
             batches.addAll(batchRepository.findByCourseIdIn(courseIdsForFullAccess));
@@ -206,7 +219,8 @@ public class PartnerAccessService {
         }
 
         // Fetch all sessions for these batch IDs scheduled within fromDate and toDate
-        List<Session> sessions = sessionRepository.findByBatchIdsAndScheduledDateBetween(requestedBatchIds, fromDate, toDate);
+        List<Session> sessions = sessionRepository.findByBatchIdsAndScheduledDateBetween(requestedBatchIds, fromDate,
+                toDate);
 
         // Group sessions by scheduledDate
         Map<LocalDate, List<Session>> sessionsByDate = sessions.stream()
@@ -218,9 +232,8 @@ public class PartnerAccessService {
         Map<UUID, String> batchNames = new HashMap<>();
         for (Batch b : batches) {
             batchNames.put(b.getId(), b.getTitle());
-            courseNames.computeIfAbsent(b.getCourseId(), cid -> 
-                courseRepository.findById(cid).map(Course::getTitle).orElse(null)
-            );
+            courseNames.computeIfAbsent(b.getCourseId(),
+                    cid -> courseRepository.findById(cid).map(Course::getTitle).orElse(null));
         }
 
         List<PartnerCalendarDayDto> calendar = new ArrayList<>();
@@ -302,7 +315,8 @@ public class PartnerAccessService {
     }
 
     private BatchDataDto mapToBatchDataDto(Batch batch, String courseName, List<PartnerAccessRequest> requests) {
-        // A partner has access to a batch if they requested the specific batch, or the entire course (batchId == null)
+        // A partner has access to a batch if they requested the specific batch, or the
+        // entire course (batchId == null)
         Optional<PartnerAccessRequest> matchingRequest = requests.stream()
                 .filter(r -> r.getBatchId() == null || r.getBatchId().equals(batch.getId()))
                 .findFirst();
@@ -323,7 +337,8 @@ public class PartnerAccessService {
                 .build();
     }
 
-    private PartnerAccessSessionDto mapToPartnerAccessSessionDto(Session session, String courseName, String batchName, boolean includeLinks, List<PartnerAccessRequest> requests) {
+    private PartnerAccessSessionDto mapToPartnerAccessSessionDto(Session session, String courseName, String batchName,
+            boolean includeLinks, List<PartnerAccessRequest> requests) {
         Optional<PartnerAccessRequest> matchingRequest = requests.stream()
                 .filter(r -> r.getBatchId() == null || r.getBatchId().equals(session.getBatchId()))
                 .findFirst();
@@ -346,6 +361,86 @@ public class PartnerAccessService {
                 .resourceLink(includeLinks ? session.getResourceLink() : null)
                 .hasRequestedAccess(matchingRequest.isPresent())
                 .accessStatus(matchingRequest.map(r -> r.getStatus().name()).orElse(null))
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartnerStudentResponseDto> getStudents(UUID partnerId, UUID batchId, UUID sessionId, String username) {
+        Partner loggedPartner = validateAndGetPartner(partnerId, username);
+        UUID effectivePartnerId = loggedPartner.getId();
+
+        List<Student> students;
+
+        if (sessionId != null) {
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Session not found with id: " + sessionId));
+
+            if (batchId != null && !session.getBatchId().equals(batchId)) {
+                throw new BusinessException("Session does not belong to the specified batch");
+            }
+
+            List<UUID> studentIds = studentSessionLogRepository.findStudentIdsBySessionIdAndPartnerId(sessionId, effectivePartnerId);
+            if (studentIds.isEmpty()) {
+                // Fallback to students enrolled under the session's batch
+                studentIds = studentEnrollmentRepository.findStudentIdsByBatchIdAndPartnerId(session.getBatchId(), effectivePartnerId);
+            }
+
+            if (studentIds.isEmpty()) {
+                return List.of();
+            }
+
+            students = studentRepository.findAllById(studentIds).stream()
+                    .filter(s -> s.getPartnerId().equals(effectivePartnerId) && !s.isDeletedByPartner())
+                    .collect(Collectors.toList());
+        } else if (batchId != null) {
+            if (!batchRepository.existsById(batchId)) {
+                throw new ResourceNotFoundException("Batch not found with id: " + batchId);
+            }
+
+            List<UUID> studentIds = studentEnrollmentRepository.findStudentIdsByBatchIdAndPartnerId(batchId, effectivePartnerId);
+            if (studentIds.isEmpty()) {
+                return List.of();
+            }
+
+            students = studentRepository.findAllById(studentIds).stream()
+                    .filter(s -> s.getPartnerId().equals(effectivePartnerId) && !s.isDeletedByPartner())
+                    .collect(Collectors.toList());
+        } else {
+            students = studentRepository.findByPartnerId(effectivePartnerId).stream()
+                    .filter(s -> !s.isDeletedByPartner())
+                    .collect(Collectors.toList());
+        }
+
+        return students.stream().map(this::mapToPartnerStudentResponseDto).collect(Collectors.toList());
+    }
+
+    private PartnerStudentResponseDto mapToPartnerStudentResponseDto(Student student) {
+        List<StudentEnrollment> enrollments = studentEnrollmentRepository.findByStudentId(student.getId());
+        List<PartnerStudentResponseDto.EnrollmentDto> enrollmentDtos = enrollments.stream()
+                .filter(e -> !e.isDeletedByPartner())
+                .map(e -> PartnerStudentResponseDto.EnrollmentDto.builder()
+                        .id(e.getId())
+                        .courseId(e.getCourseId())
+                        .batchId(e.getBatchId())
+                        .courseName(e.getCourseName())
+                        .batchName(e.getBatchName())
+                        .status(e.getStatus() != null ? e.getStatus().name() : null)
+                        .enrolledAt(e.getEnrolledAt() != null ? e.getEnrolledAt().toString() : null)
+                        .completedAt(e.getCompletedAt() != null ? e.getCompletedAt().toString() : null)
+                        .build())
+                .collect(Collectors.toList());
+
+        return PartnerStudentResponseDto.builder()
+                .id(student.getId())
+                .firstName(student.getFirstName())
+                .lastName(student.getLastName())
+                .fullName(student.getFullName())
+                .email(student.getEmail())
+                .phoneNumber(student.getPhoneNumber())
+                .college(student.getCollege())
+                .branch(student.getBranch())
+                .academicYear(student.getAcademicYear())
+                .enrollments(enrollmentDtos)
                 .build();
     }
 }

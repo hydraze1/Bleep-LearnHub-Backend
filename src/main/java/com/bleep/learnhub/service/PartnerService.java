@@ -2,8 +2,10 @@ package com.bleep.learnhub.service;
 
 import com.bleep.learnhub.dto.request.PartnerCreateDto;
 import com.bleep.learnhub.dto.request.PartnerUpdateDto;
+import com.bleep.learnhub.dto.response.AccessRequestResponseDto;
 import com.bleep.learnhub.dto.response.PartnerProfileResponseDto;
 import com.bleep.learnhub.entity.Partner;
+import com.bleep.learnhub.entity.PartnerAccessRequest;
 import com.bleep.learnhub.entity.User;
 import com.bleep.learnhub.entity.Vendor;
 import com.bleep.learnhub.entity.enums.AccountStatus;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -51,7 +54,8 @@ public class PartnerService {
                     .orElseThrow(() -> new ResourceNotFoundException("Vendor not found with ID: " + dto.getVendorId()));
         } else {
             vendor = vendorRepository.findByUserUsername(callerUsername)
-                    .orElseThrow(() -> new ResourceNotFoundException("Vendor profile not found for user: " + callerUsername));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Vendor profile not found for user: " + callerUsername));
         }
 
         User creator = userRepository.findByUsername(callerUsername).orElse(null);
@@ -93,7 +97,8 @@ public class PartnerService {
     }
 
     @Transactional(readOnly = true)
-    public List<PartnerProfileResponseDto> getPartnersByVendorId(UUID vendorId, String callerUsername, boolean isSuperAdmin) {
+    public List<PartnerProfileResponseDto> getPartnersByVendorId(UUID vendorId, String callerUsername,
+            boolean isSuperAdmin) {
         if (!isSuperAdmin) {
             Vendor vendor = vendorRepository.findByUserUsername(callerUsername)
                     .orElseThrow(() -> new ResourceNotFoundException("Vendor profile not found"));
@@ -170,9 +175,11 @@ public class PartnerService {
             }
         }
 
-        boolean hasActiveAccess = partnerAccessRequestRepository.existsByPartnerIdAndStatus(id, com.bleep.learnhub.entity.enums.AccessRequestStatus.APPROVED);
+        boolean hasActiveAccess = partnerAccessRequestRepository.existsByPartnerIdAndStatus(id,
+                com.bleep.learnhub.entity.enums.AccessRequestStatus.APPROVED);
         if (hasActiveAccess) {
-            throw new com.bleep.learnhub.exception.BusinessException("Cannot delete partner with active batch access. Remove access first.");
+            throw new com.bleep.learnhub.exception.BusinessException(
+                    "Cannot delete partner with active batch access. Remove access first.");
         }
 
         User partnerUser = partner.getUser();
@@ -193,6 +200,12 @@ public class PartnerService {
     // ── Mappers ──────────────────────────────────────────────────────────────────
 
     private PartnerProfileResponseDto mapToProfileResponseDto(Partner partner) {
+        List<AccessRequestResponseDto> accessRequests = partnerAccessRequestRepository
+                .findByPartnerId(partner.getId())
+                .stream()
+                .map(this::mapToAccessRequestDto)
+                .collect(Collectors.toList());
+
         return PartnerProfileResponseDto.builder()
                 .id(partner.getId().toString())
                 .username(partner.getUser().getUsername())
@@ -203,6 +216,28 @@ public class PartnerService {
                 .parentVendorId(partner.getVendor().getId().toString())
                 .parentVendorCompanyName(partner.getVendor().getCompanyName())
                 .isActive(partner.isActive())
+                .accessRequests(accessRequests)
+                .build();
+    }
+
+    private AccessRequestResponseDto mapToAccessRequestDto(PartnerAccessRequest req) {
+        DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        return AccessRequestResponseDto.builder()
+                .id(req.getId())
+                .partnerId(req.getPartnerId())
+                .vendorId(req.getVendorId())
+                .courseId(req.getCourseId())
+                .batchId(req.getBatchId())
+                .partnerName(req.getPartnerName())
+                .courseName(req.getCourseName())
+                .batchName(req.getBatchName())
+                .status(req.getStatus() != null ? req.getStatus().name() : null)
+                .requestNote(req.getRequestNote())
+                .hasBatchAccess(req.getHasBatchAccess())
+                .maxStudents(req.getMaxStudents())
+                .responseNote(req.getResponseNote())
+                .requestedAt(req.getRequestedAt() != null ? req.getRequestedAt().format(fmt) : null)
+                .resolvedAt(req.getResolvedAt() != null ? req.getResolvedAt().format(fmt) : null)
                 .build();
     }
 }

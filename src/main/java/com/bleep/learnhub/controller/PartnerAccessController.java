@@ -5,6 +5,7 @@ import com.bleep.learnhub.dto.response.CourseDataDto;
 import com.bleep.learnhub.dto.response.BatchDataDto;
 import com.bleep.learnhub.dto.response.PartnerAccessSessionDto;
 import com.bleep.learnhub.dto.response.PartnerCalendarDayDto;
+import com.bleep.learnhub.dto.response.PartnerStudentResponseDto;
 import com.bleep.learnhub.service.PartnerAccessService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -48,7 +49,8 @@ public class PartnerAccessController {
             @RequestParam UUID batchId,
             @RequestParam(required = false) UUID partnerId,
             Authentication authentication) {
-        List<PartnerAccessSessionDto> sessions = partnerAccessService.getSessions(courseId, batchId, partnerId, authentication.getName());
+        List<PartnerAccessSessionDto> sessions = partnerAccessService.getSessions(courseId, batchId, partnerId,
+                authentication.getName());
         return ResponseEntity.ok(ApiResponse.success(sessions, "Sessions retrieved successfully"));
     }
 
@@ -58,7 +60,18 @@ public class PartnerAccessController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestParam UUID partnerId,
             Authentication authentication) {
-        List<PartnerCalendarDayDto> schedule = partnerAccessService.getSchedule(fromDate, toDate, partnerId, authentication.getName());
+        List<PartnerCalendarDayDto> schedule = partnerAccessService.getSchedule(fromDate, toDate, partnerId,
+                authentication.getName());
         return ResponseEntity.ok(ApiResponse.success(schedule, "Schedule retrieved successfully"));
+    }
+
+    @GetMapping("/students")
+    public ResponseEntity<ApiResponse<List<PartnerStudentResponseDto>>> getStudents(
+            @RequestParam(required = false) UUID partnerId,
+            @RequestParam(required = false) UUID batchId,
+            @RequestParam(required = false) UUID sessionId,
+            Authentication authentication) {
+        List<PartnerStudentResponseDto> students = partnerAccessService.getStudents(partnerId, batchId, sessionId, authentication.getName());
+        return ResponseEntity.ok(ApiResponse.success(students, "Students retrieved successfully"));
     }
 }

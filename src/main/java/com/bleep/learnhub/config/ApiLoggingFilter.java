@@ -38,9 +38,10 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Skip static resources and swagger to prevent log bloat
+        // Skip static resources, swagger, and SSE streaming endpoints to prevent closing the stream
         String url = request.getRequestURI();
-        if (url.startsWith("/v3/api-docs") || url.startsWith("/swagger-ui")) {
+        String acceptHeader = request.getHeader("Accept");
+        if (url.startsWith("/v3/api-docs") || url.startsWith("/swagger-ui") || url.endsWith("/stream") || (acceptHeader != null && acceptHeader.contains("text/event-stream"))) {
             filterChain.doFilter(request, response);
             return;
         }

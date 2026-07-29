@@ -29,10 +29,10 @@ public class NotificationSender {
 
         for (UUID partnerId : recipientPartnerIds) {
             if (connectionManager.isConnected(partnerId)) {
-                log.debug("Sending SSE notification to connected partner: {}", partnerId);
+                log.info("Sending SSE notification to connected partner: {}", partnerId);
                 connectionManager.send(partnerId, event, "notification");
             } else {
-                log.debug("Partner {} is offline. Skipping real-time SSE push.", partnerId);
+                log.info("Partner {} is offline. Skipping real-time SSE push.", partnerId);
             }
         }
     }

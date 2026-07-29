@@ -48,6 +48,14 @@ public class MasterLoggingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        // Skip SSE streaming endpoints to prevent ContentCachingResponseWrapper from closing the stream
+        String url = request.getRequestURI();
+        String acceptHeader = request.getHeader("Accept");
+        if (url.endsWith("/stream") || (acceptHeader != null && acceptHeader.contains("text/event-stream"))) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 1. Generate a unique Trace ID — ALWAYS, regardless of verbose flag
         String traceId = UUID.randomUUID().toString();
         MDC.put("correlationId", traceId);

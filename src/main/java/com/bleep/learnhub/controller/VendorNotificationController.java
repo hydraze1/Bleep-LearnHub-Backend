@@ -18,7 +18,7 @@ import java.security.Principal;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/vendors/notifications")
+@RequestMapping("/vendors/notifications")
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('VENDOR')")
 public class VendorNotificationController {

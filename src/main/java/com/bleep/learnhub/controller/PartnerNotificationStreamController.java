@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/v1/partners/notifications")
+@RequestMapping("/partners/notifications")
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('PARTNER')")
 public class PartnerNotificationStreamController {

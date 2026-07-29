@@ -41,7 +41,8 @@ public class PartnerPortalController {
     public ResponseEntity<ApiResponse<List<PartnerSessionResponseDto>>> getSessions(
             @PathVariable UUID partnerId,
             @PathVariable UUID batchId) {
-        List<PartnerSessionResponseDto> sessions = partnerPortalService.getSessionsByBatchAndPartner(partnerId, batchId);
+        List<PartnerSessionResponseDto> sessions = partnerPortalService.getSessionsByBatchAndPartner(partnerId,
+                batchId);
         return ResponseEntity.ok(ApiResponse.success(sessions, "Sessions retrieved successfully"));
     }
 

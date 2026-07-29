@@ -3,6 +3,8 @@ package com.bleep.learnhub.dto.response;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class PartnerProfileResponseDto {
@@ -12,10 +14,13 @@ public class PartnerProfileResponseDto {
     private String companyName;
     private String phone;
     private String description;
-    
+
     // It's helpful for the client to know who the parent vendor is
-    private String parentVendorId; 
+    private String parentVendorId;
     private String parentVendorCompanyName;
-    
+
     private boolean isActive;
+
+    // All access requests for this partner (PENDING, APPROVED, REVOKED)
+    private List<AccessRequestResponseDto> accessRequests;
 }
