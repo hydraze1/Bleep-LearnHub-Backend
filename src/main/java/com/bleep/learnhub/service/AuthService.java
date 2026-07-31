@@ -85,6 +85,7 @@ public class AuthService {
 
         // 2. Re-fetch the User entity (authentication passed, so we know it exists)
         User user = userRepository.findByUsername(request.getUsername())
+                .or(() -> userRepository.findByEmail(request.getUsername()))
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (user.getStatus() != AccountStatus.ACTIVE) {
