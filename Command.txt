@@ -20,7 +20,8 @@ OpenAPI Specs (JSON): http://localhost:8080/bleep-learnhub-backend/api/v1/v3/api
 
 https://docmedhos.develeganceinnovatech.in/adtApi/swagger-ui/index.html#/Admission/admitPatient
 
-
+http://200.97.175.94:3001/super-admin/vendor-management
+http://200.97.175.94:8081/bleep-learnhub-backend/api/v1/swagger-ui/index.html
 
 sudo ufw allow ssh
 
