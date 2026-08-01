@@ -52,6 +52,9 @@ public class AuthService {
     @org.springframework.beans.factory.annotation.Value("${app.otp.time-frame-minutes}")
     private int otpTimeFrameMinutes;
 
+    @org.springframework.beans.factory.annotation.Value("${app.session.timeout-seconds:3600}")
+    private long sessionTimeoutSeconds;
+
     // ── Result record for login (sessionId + payload) ────────────────────────────
 
     /**
@@ -95,9 +98,9 @@ public class AuthService {
         // 3. Build the composite response DTO
         LoginResponseDto responseDto = buildLoginResponseDto(user, deviceDetails);
 
-        // 4. Generate session ID and persist in Redis (TTL = 7 days)
+        // 4. Generate session ID and persist in Redis (TTL from config)
         String sessionId = UUID.randomUUID().toString();
-        redisService.saveSessionData(sessionId, responseDto, 7);
+        redisService.saveSessionData(sessionId, responseDto, sessionTimeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
 
         // 5. Audit: persist session record in PostgreSQL for history/reporting
         UserSession sessionRecord = UserSession.builder()

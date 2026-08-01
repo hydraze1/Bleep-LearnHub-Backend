@@ -43,9 +43,16 @@ public class RedisService {
      * @param days      TTL in days.
      */
     public void saveSessionData(String sessionId, LoginResponseDto data, int days) {
+        saveSessionData(sessionId, data, (long) days, TimeUnit.DAYS);
+    }
+
+    /**
+     * Serialises {@code data} to JSON and stores it at {@code session:{sessionId}} with custom timeout duration.
+     */
+    public void saveSessionData(String sessionId, LoginResponseDto data, long timeout, TimeUnit unit) {
         try {
             String json = objectMapper.writeValueAsString(data);
-            redisTemplate.opsForValue().set(SESSION_PREFIX + sessionId, json, days, TimeUnit.DAYS);
+            redisTemplate.opsForValue().set(SESSION_PREFIX + sessionId, json, timeout, unit);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialise session data for sessionId={}: {}", sessionId, e.getMessage());
             throw new RuntimeException("Failed to save session data", e);

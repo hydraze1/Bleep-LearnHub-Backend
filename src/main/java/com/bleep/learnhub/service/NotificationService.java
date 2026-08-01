@@ -8,6 +8,8 @@ import com.bleep.learnhub.exception.ResourceNotFoundException;
 import com.bleep.learnhub.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.bleep.learnhub.event.NotificationCreatedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,7 @@ public class NotificationService {
     private final CourseRepository courseRepository;
     private final BatchRepository batchRepository;
     private final NotificationSender notificationSender;
+    private final ApplicationEventPublisher eventPublisher;
 
     // ==========================================
     // VENDOR OPERATIONS
@@ -70,9 +73,9 @@ public class NotificationService {
 
         recipientRepository.saveAll(recipients);
 
-        // 4. Trigger SSE Real-Time Push to Online Partners
+        // 4. Trigger SSE Real-Time Push AFTER DB Transaction Commit
         List<UUID> recipientPartnerIds = targetPartners.stream().map(Partner::getId).collect(Collectors.toList());
-        notificationSender.sendToRecipients(notification, recipientPartnerIds);
+        eventPublisher.publishEvent(new NotificationCreatedEvent(notification, recipientPartnerIds));
 
         return mapToVendorResponseDto(notification, recipients.size(), 0);
     }

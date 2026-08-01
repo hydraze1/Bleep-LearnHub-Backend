@@ -46,6 +46,9 @@ public class AuthController {
     private final AuthService authService;
     private final CookieService cookieService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.session.timeout-seconds:3600}")
+    private long sessionTimeoutSeconds;
+
     // ── 1. Login ──────────────────────────────────────────────────────────────────
 
     /**
@@ -89,7 +92,7 @@ public class AuthController {
 
         // Set the session cookie on the response (HttpOnly + Secure + SameSite=Strict)
         ResponseCookie sessionCookie = cookieService.createCookie(
-                CookieConstants.SESSION_ID, result.sessionId(), CookieConstants.SESSION_AGE);
+                CookieConstants.SESSION_ID, result.sessionId(), sessionTimeoutSeconds);
         servletResponse.addHeader("Set-Cookie", sessionCookie.toString());
 
         return ResponseEntity.ok(ApiResponse.success(result.data(), "Login successful."));
