@@ -16,23 +16,45 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
+import org.springframework.beans.factory.DisposableBean;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ApiLoggingFilter extends OncePerRequestFilter {
+public class ApiLoggingFilter extends OncePerRequestFilter implements DisposableBean {
 
     private final ApiLogRepository apiLogRepository;
     private final RedisService redisService;
     private final int rateLimitMaxRequests;
     private final int rateLimitTimeFrameMinutes;
     
-    // Use an executor to save logs asynchronously so it doesn't block the API response
-    private final ExecutorService logExecutor = Executors.newSingleThreadExecutor();
+    // Use a bounded thread pool executor to save logs asynchronously to prevent unbounded queue expansion (OOM)
+    private final ExecutorService logExecutor = new ThreadPoolExecutor(
+            1, 1,
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(5000), // Queue capacity bounded to 5000 tasks
+            new ThreadPoolExecutor.DiscardOldestPolicy() // Discard oldest task if the queue is saturated under load
+    );
+
+    @Override
+    public void destroy() {
+        log.info("Shutting down ApiLoggingFilter executor service...");
+        logExecutor.shutdown();
+        try {
+            if (!logExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                logExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            logExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

@@ -5,6 +5,7 @@ import com.bleep.learnhub.dto.response.StudentDataSyncResponseDto;
 import com.bleep.learnhub.entity.Student;
 import com.bleep.learnhub.entity.StudentEnrollment;
 import com.bleep.learnhub.entity.StudentSessionLog;
+import com.bleep.learnhub.exception.BusinessException;
 import com.bleep.learnhub.repository.StudentEnrollmentRepository;
 import com.bleep.learnhub.repository.StudentRepository;
 import com.bleep.learnhub.repository.StudentSessionLogRepository;
@@ -26,14 +27,20 @@ public class StudentDataSyncService {
 
     @Transactional
     public StudentDataSyncResponseDto syncStudentData(StudentDataSyncRequest request) {
+        if (request == null) {
+            throw new BusinessException("Sync request body cannot be null");
+        }
 
         // ── 1. Student ──────────────────────────────────────────────
         Student student;
         if (request.getStudentId() != null) {
             // studentId sent → use existing, don't save
             student = studentRepository.findById(request.getStudentId())
-                    .orElseThrow(() -> new RuntimeException("Student not found with id: " + request.getStudentId()));
+                    .orElseThrow(() -> new BusinessException("Student not found with id: " + request.getStudentId()));
         } else {
+            if (request.getEmail() == null || request.getEmail().isBlank()) {
+                throw new BusinessException("Student email is required when studentId is not provided");
+            }
             // studentId not sent → check if student with this email already exists
             java.util.Optional<Student> existingStudent = studentRepository.findByEmail(request.getEmail());
             if (existingStudent.isPresent()) {

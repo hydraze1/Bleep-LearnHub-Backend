@@ -19,21 +19,32 @@ public class SseConnectionManager {
     private final Map<UUID, SseEmitter> activeConnections = new ConcurrentHashMap<>();
 
     public SseEmitter register(UUID partnerId) {
+        // Complete and clean up any existing connection first
+        SseEmitter oldEmitter = activeConnections.remove(partnerId);
+        if (oldEmitter != null) {
+            try {
+                oldEmitter.complete();
+                log.info("🧹 Cleaned up and completed old SSE connection for partner: {}", partnerId);
+            } catch (Exception e) {
+                log.warn("⚠️ Failed to cleanly complete old SSE connection for partner {}: {}", partnerId, e.getMessage());
+            }
+        }
+
         SseEmitter emitter = new SseEmitter(EMITTER_TIMEOUT);
 
         emitter.onCompletion(() -> {
             log.info("📡 SSE Connection completed for partner: {}", partnerId);
-            remove(partnerId);
+            remove(partnerId, emitter);
         });
 
         emitter.onTimeout(() -> {
             log.info("⏰ SSE Connection timed out for partner: {}", partnerId);
-            remove(partnerId);
+            remove(partnerId, emitter);
         });
 
         emitter.onError(e -> {
             log.warn("⚠️ SSE Connection error for partner {}: {}", partnerId, e.getMessage());
-            remove(partnerId);
+            remove(partnerId, emitter);
         });
 
         activeConnections.put(partnerId, emitter);
@@ -46,14 +57,18 @@ public class SseConnectionManager {
                     .data("SSE Connection established successfully for partner: " + partnerId));
         } catch (IOException e) {
             log.warn("Failed to send initial handshake SSE event to partner: {}", partnerId);
-            remove(partnerId);
+            remove(partnerId, emitter);
         }
 
         return emitter;
     }
 
-    public void remove(UUID partnerId) {
-        activeConnections.remove(partnerId);
+    public void remove(UUID partnerId, SseEmitter emitter) {
+        if (emitter != null) {
+            activeConnections.remove(partnerId, emitter);
+        } else {
+            activeConnections.remove(partnerId);
+        }
     }
 
     public boolean isConnected(UUID partnerId) {
@@ -69,7 +84,7 @@ public class SseConnectionManager {
                         .data(data));
             } catch (IOException e) {
                 log.warn("Failed to send SSE event to partner {}. Removing dead connection.", partnerId);
-                remove(partnerId);
+                remove(partnerId, emitter);
             }
         }
     }

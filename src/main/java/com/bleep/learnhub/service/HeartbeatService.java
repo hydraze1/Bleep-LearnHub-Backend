@@ -30,7 +30,7 @@ public class HeartbeatService {
                         .data("heartbeat"));
             } catch (IOException e) {
                 log.warn("Heartbeat failed for partner {}. Removing dead connection.", partnerId);
-                connectionManager.remove(partnerId);
+                connectionManager.remove(partnerId, emitter);
             }
         });
     }
