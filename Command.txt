@@ -1,5 +1,7 @@
 mvn spring-boot:run
 
+ssh root@200.97.175.94
+
     # sudo systemctl start docker
     # sudo systemctl stop docker
     # sudo systemctl status docker
