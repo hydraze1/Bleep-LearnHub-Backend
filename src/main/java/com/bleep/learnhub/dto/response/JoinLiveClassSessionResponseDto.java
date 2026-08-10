@@ -31,6 +31,7 @@ public class JoinLiveClassSessionResponseDto {
         private String resourceLink;
         private String scheduledDate;
         private String scheduledTime;
+        private String endTime;
     }
 
     @Data

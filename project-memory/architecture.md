@@ -56,6 +56,21 @@ com.bleep.learnhub/
   constants/        — CookieConstants, etc.
 ```
 
+## Database Migrations (Flyway)
+- **Flyway** manages all schema changes — runs automatically on startup before Hibernate.
+- `spring.jpa.hibernate.ddl-auto=validate` — Hibernate only validates, never modifies schema.
+- Migration files live in `src/main/resources/db/migration/` (e.g., `V1__add_end_time_to_sessions.sql`).
+- `spring.flyway.baseline-on-migrate=true` — handles existing DBs that predate Flyway.
+- Adding a new column/table: create a new `V<next>__<desc>.sql` file, deploy — Flyway runs it.
+
+## Session Entity Fields
+- `id` (UUID), `courseId`, `batchId`, `sessionType` (CLASS/NOTE/ASSIGNMENT/PROJECT)
+- `title`, `subtitle`, `description`
+- `liveLink`, `recordedLink`, `resourceLink` — link fields vary by session type (CLASS uses live+recorded, others use resource)
+- `sequenceOrder` — ordering within a batch
+- `scheduledDate` (LocalDate), `scheduledTime` (LocalTime), `endTime` (LocalTime) — when the live class ends
+- `createdAt`, `updatedAt`
+
 ## Controllers
 | Controller | Path | Purpose |
 |-----------|------|---------|

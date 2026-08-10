@@ -23,6 +23,7 @@ public class PartnerAccessSessionDto {
     private Integer sequenceOrder;
     private String scheduledDate;
     private String scheduledTime;
+    private String endTime;
     
     // Links only present if approved
     private String liveLink;

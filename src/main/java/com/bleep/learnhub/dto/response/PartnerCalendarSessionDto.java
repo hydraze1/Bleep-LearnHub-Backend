@@ -22,4 +22,5 @@ public class PartnerCalendarSessionDto {
     private Integer sequenceOrder;
     private String scheduledDate;
     private String scheduledTime;
+    private String endTime;
 }

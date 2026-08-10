@@ -22,6 +22,7 @@ public class PartnerSessionResponseDto {
     private Integer sequenceOrder;
     private String scheduledDate;
     private String scheduledTime;
+    private String endTime;
     private long studentCount; // Number of unique students from the partner who accessed this session
     private Integer maxStudents; // Student limit from the partner access request
     private boolean limitExceeded; // true if studentCount > maxStudents

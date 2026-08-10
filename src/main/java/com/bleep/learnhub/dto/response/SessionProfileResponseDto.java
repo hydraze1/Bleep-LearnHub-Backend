@@ -25,6 +25,7 @@ public class SessionProfileResponseDto {
     private Integer sequenceOrder;
     private String scheduledDate;
     private String scheduledTime;
+    private String endTime;
     private String createdAt;
     private String updatedAt;
 }

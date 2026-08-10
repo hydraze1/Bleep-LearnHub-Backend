@@ -67,6 +67,9 @@ public class Session {
     @Column(name = "scheduled_time")
     private LocalTime scheduledTime;
 
+    @Column(name = "end_time")
+    private LocalTime endTime;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

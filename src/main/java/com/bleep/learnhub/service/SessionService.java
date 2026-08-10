@@ -50,6 +50,7 @@ public class SessionService {
                 .sequenceOrder(maxSequenceOrder + 1)
                 .scheduledDate(dto.getScheduledDate())
                 .scheduledTime(dto.getScheduledTime() != null ? java.time.LocalTime.parse(dto.getScheduledTime()) : null)
+                .endTime(dto.getEndTime() != null ? java.time.LocalTime.parse(dto.getEndTime()) : null)
                 .build();
 
         session = sessionRepository.save(session);
@@ -68,6 +69,7 @@ public class SessionService {
         session.setResourceLink(dto.getResourceLink());
         session.setScheduledDate(dto.getScheduledDate());
         session.setScheduledTime(dto.getScheduledTime() != null ? java.time.LocalTime.parse(dto.getScheduledTime()) : null);
+        session.setEndTime(dto.getEndTime() != null ? java.time.LocalTime.parse(dto.getEndTime()) : null);
 
         sessionRepository.save(session);
     }
@@ -151,6 +153,7 @@ public class SessionService {
                 .sequenceOrder(session.getSequenceOrder())
                 .scheduledDate(session.getScheduledDate() != null ? session.getScheduledDate().toString() : null)
                 .scheduledTime(session.getScheduledTime() != null ? session.getScheduledTime().toString() : null)
+                .endTime(session.getEndTime() != null ? session.getEndTime().toString() : null)
                 .createdAt(session.getCreatedAt() != null ? session.getCreatedAt().toString() : null)
                 .updatedAt(session.getUpdatedAt() != null ? session.getUpdatedAt().toString() : null)
                 .build();
@@ -171,6 +174,7 @@ public class SessionService {
                 .sequenceOrder(session.getSequenceOrder())
                 .scheduledDate(session.getScheduledDate() != null ? session.getScheduledDate().toString() : null)
                 .scheduledTime(session.getScheduledTime() != null ? session.getScheduledTime().toString() : null)
+                .endTime(session.getEndTime() != null ? session.getEndTime().toString() : null)
                 .createdAt(session.getCreatedAt() != null ? session.getCreatedAt().toString() : null)
                 .updatedAt(session.getUpdatedAt() != null ? session.getUpdatedAt().toString() : null)
                 .build();

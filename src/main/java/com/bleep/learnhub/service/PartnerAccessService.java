@@ -268,6 +268,7 @@ public class PartnerAccessService {
                                 .sequenceOrder(s.getSequenceOrder())
                                 .scheduledDate(s.getScheduledDate() != null ? s.getScheduledDate().toString() : null)
                                 .scheduledTime(s.getScheduledTime() != null ? s.getScheduledTime().toString() : null)
+                                .endTime(s.getEndTime() != null ? s.getEndTime().toString() : null)
                                 .build();
                     })
                     .collect(Collectors.toList());
@@ -356,6 +357,7 @@ public class PartnerAccessService {
                 .sequenceOrder(session.getSequenceOrder())
                 .scheduledDate(session.getScheduledDate() != null ? session.getScheduledDate().toString() : null)
                 .scheduledTime(session.getScheduledTime() != null ? session.getScheduledTime().toString() : null)
+                .endTime(session.getEndTime() != null ? session.getEndTime().toString() : null)
                 .liveLink(includeLinks ? session.getLiveLink() : null)
                 .recordedLink(includeLinks ? session.getRecordedLink() : null)
                 .resourceLink(includeLinks ? session.getResourceLink() : null)
