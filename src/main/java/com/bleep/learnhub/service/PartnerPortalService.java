@@ -6,6 +6,8 @@ import com.bleep.learnhub.dto.response.PartnerSessionResponseDto;
 import com.bleep.learnhub.dto.response.PartnerStudentResponseDto;
 import com.bleep.learnhub.entity.*;
 import com.bleep.learnhub.entity.enums.AccessRequestStatus;
+import com.bleep.learnhub.dto.response.JoinLiveClassSessionResponseDto;
+import com.bleep.learnhub.exception.ResourceNotFoundException;
 import com.bleep.learnhub.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class PartnerPortalService {
     private final StudentRepository studentRepository;
     private final StudentEnrollmentRepository studentEnrollmentRepository;
     private final StudentSessionLogRepository studentSessionLogRepository;
+    private final PartnerRepository partnerRepository;
 
     public List<CourseDataDto> getCoursesByPartnerId(UUID partnerId) {
         List<UUID> courseIds = accessRequestRepository.findByPartnerId(partnerId).stream()
@@ -210,6 +213,54 @@ public class PartnerPortalService {
                 .endingDate(batch.getEndingDate() != null ? batch.getEndingDate().toString() : null)
                 .createdAt(batch.getCreatedAt() != null ? batch.getCreatedAt().toString() : null)
                 .updatedAt(batch.getUpdatedAt() != null ? batch.getUpdatedAt().toString() : null)
+                .build();
+    }
+
+    public JoinLiveClassSessionResponseDto getOpenSessionDetails(UUID sessionId, UUID partnerId) {
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Session not found with ID: " + sessionId));
+
+        String batchName = "";
+        if (session.getBatchId() != null) {
+            Batch batch = batchRepository.findById(session.getBatchId()).orElse(null);
+            if (batch != null) {
+                batchName = batch.getTitle();
+            }
+        }
+
+        String courseName = "";
+        if (session.getCourseId() != null) {
+            courseName = courseRepository.findById(session.getCourseId())
+                    .map(Course::getTitle)
+                    .orElse("");
+        }
+
+        String companyName = "";
+        if (partnerId != null) {
+            companyName = partnerRepository.findById(partnerId)
+                    .map(Partner::getCompanyName)
+                    .orElse("");
+        }
+
+        return JoinLiveClassSessionResponseDto.builder()
+                .session(JoinLiveClassSessionResponseDto.SessionDto.builder()
+                        .id(session.getId() != null ? session.getId().toString() : "")
+                        .courseId(session.getCourseId() != null ? session.getCourseId().toString() : "")
+                        .courseName(courseName)
+                        .batchId(session.getBatchId() != null ? session.getBatchId().toString() : "")
+                        .batchName(batchName)
+                        .sessionType(session.getSessionType() != null ? session.getSessionType().name() : "CLASS")
+                        .title(session.getTitle() != null ? session.getTitle() : "")
+                        .subtitle(session.getSubtitle() != null ? session.getSubtitle() : "")
+                        .liveLink(session.getLiveLink() != null ? session.getLiveLink() : "")
+                        .resourceLink(session.getResourceLink() != null ? session.getResourceLink() : "")
+                        .scheduledDate(session.getScheduledDate() != null ? session.getScheduledDate().toString() : "")
+                        .scheduledTime(session.getScheduledTime() != null ? session.getScheduledTime().toString() : "")
+                        .build())
+                .partnerDetails(JoinLiveClassSessionResponseDto.PartnerDto.builder()
+                        .id(partnerId != null ? partnerId.toString() : "")
+                        .companyName(companyName)
+                        .build())
                 .build();
     }
 }
