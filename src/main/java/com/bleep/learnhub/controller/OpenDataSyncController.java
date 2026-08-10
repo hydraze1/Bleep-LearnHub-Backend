@@ -3,6 +3,7 @@ package com.bleep.learnhub.controller;
 import com.bleep.learnhub.dto.StudentDataSyncRequest;
 import com.bleep.learnhub.dto.request.ComplaintCreateDto;
 import com.bleep.learnhub.dto.response.StudentDataSyncResponseDto;
+import com.bleep.learnhub.dto.response.JoinLiveClassSessionResponseDto;
 import com.bleep.learnhub.service.PartnerPortalService;
 import com.bleep.learnhub.dto.response.CourseDataDto;
 import com.bleep.learnhub.dto.response.BatchDataDto;
@@ -49,5 +50,13 @@ public class OpenDataSyncController {
     public ResponseEntity<com.bleep.learnhub.dto.response.ApiResponse<List<BatchDataDto>>> getBatchesByCourse(@PathVariable UUID courseId, @RequestParam UUID partnerId) {
         List<BatchDataDto> batches = partnerPortalService.getBatchesByPartnerAndCourse(partnerId, courseId);
         return ResponseEntity.ok(com.bleep.learnhub.dto.response.ApiResponse.success(batches, "Batches retrieved successfully"));
+    }
+
+    @GetMapping("/session-details")
+    public ResponseEntity<com.bleep.learnhub.dto.response.ApiResponse<JoinLiveClassSessionResponseDto>> getSessionDetails(
+            @RequestParam UUID sessionId,
+            @RequestParam UUID partnerId) {
+        JoinLiveClassSessionResponseDto response = partnerPortalService.getOpenSessionDetails(sessionId, partnerId);
+        return ResponseEntity.ok(com.bleep.learnhub.dto.response.ApiResponse.success(response, "Session details retrieved successfully"));
     }
 }

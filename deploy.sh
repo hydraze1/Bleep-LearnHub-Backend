@@ -106,8 +106,8 @@ ssh "$VM_USER@$VM_IP" << EOF
 
     echo "--> [2/7] Gracefully stopping old containers (Isolated to this project)..."
     # This safely stops only the containers defined in this specific docker-compose.yml
-    if docker compose ls | grep -q "$REMOTE_DIR"; then
-        docker compose down
+    if docker compose -p "${COMPOSE_PROJECT_NAME}" ps -q | grep -q .; then
+        docker compose -p "${COMPOSE_PROJECT_NAME}" down
     else
         echo "    No existing running containers found for this project. Moving on."
     fi
@@ -124,7 +124,7 @@ ssh "$VM_USER@$VM_IP" << EOF
     rm -f ${IMAGE_NAME}-${IMAGE_TAG}.tar
 
     echo "--> [5/7] Starting new containers..."
-    docker compose up -d
+    docker compose -p "${COMPOSE_PROJECT_NAME}" up -d
 
     echo "--> [6/7] Cleaning up deployment archives..."
     rm -f $TAR_GZ_FILE

@@ -27,7 +27,7 @@ public class EmailService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromEmail);
             message.setTo(to);
-            message.setSubject("Welcome to Bleep LearnHub!");
+            message.setSubject("Welcome to B2B Training Center!");
             message.setText("Hello,\n\nYour " + role + " account has been created. " +
                     "Your username is: " + username + "\n\n" +
                     "Please use the app to send yourself an OTP and set up your password.");
@@ -44,7 +44,7 @@ public class EmailService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromEmail);
             message.setTo(to);
-            message.setSubject("Your Bleep LearnHub OTP");
+            message.setSubject("Your B2B Training Center OTP");
             message.setText("Your One-Time Password is: " + otp +
                     "\n\nThis OTP will expire in " + otpTimeFrameMinutes + " minutes. Do not share it with anyone.");
             mailSender.send(message);
@@ -60,8 +60,8 @@ public class EmailService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromEmail);
             message.setTo(to);
-            message.setSubject("Your Bleep LearnHub Username");
-            message.setText("Hello,\n\nYour username for Bleep LearnHub is: " + username +
+            message.setSubject("Your B2B Training Center Username");
+            message.setText("Hello,\n\nYour username for B2B Training Center is: " + username +
                     "\n\nIf you did not request this, please ignore this email.");
             mailSender.send(message);
             log.info("Forgot-username email sent successfully to {}", to);
