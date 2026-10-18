@@ -1,0 +1,120 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // Always load the project memory as instructions
+  "instructions": ["PROJECT_MEMORY.md"],
+
+  "permissions": [
+    // ============================================================
+    // SHELL COMMANDS
+    // ============================================================
+    // Default: EVERY shell command requires permission
+    { "action": "shell", "resource": "*", "effect": "ask" },
+
+    // --- Read-only git inspection: runs WITHOUT permission ---
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "git show *", "effect": "allow" },
+    { "action": "shell", "resource": "git branch *", "effect": "allow" },
+
+    // --- Harmless filesystem inspection: runs WITHOUT permission ---
+    { "action": "shell", "resource": "ls *", "effect": "allow" },
+    { "action": "shell", "resource": "pwd", "effect": "allow" },
+
+    // --- Maven build / test: runs WITHOUT permission ---
+    { "action": "shell", "resource": "mvn -v", "effect": "allow" },
+    { "action": "shell", "resource": "mvn clean", "effect": "allow" },
+    { "action": "shell", "resource": "mvn clean compile", "effect": "allow" },
+    { "action": "shell", "resource": "mvn compile", "effect": "allow" },
+    { "action": "shell", "resource": "mvn clean test", "effect": "allow" },
+    { "action": "shell", "resource": "mvn test", "effect": "allow" },
+    { "action": "shell", "resource": "mvn clean package *", "effect": "allow" },
+    { "action": "shell", "resource": "mvn clean verify *", "effect": "allow" },
+
+    // --- Needs permission (ask): git add/commit, mvn spring-boot:run,
+    //     ./build.sh, ./deploy.sh, npm/npx, docker, curl, wget, etc.
+    //     (covered by the "*" -> ask rule above) ---
+
+    // --- NEVER allowed (hard deny) ---
+    { "action": "shell", "resource": "sudo *", "effect": "deny" },
+    { "action": "shell", "resource": "rm -rf *", "effect": "deny" },
+    { "action": "shell", "resource": "chmod 777 *", "effect": "deny" },
+    // force-pushing can destroy remote history
+    { "action": "shell", "resource": "git push --force*", "effect": "deny" },
+    { "action": "shell", "resource": "git push -f *", "effect": "deny" },
+    // never SSH / SCP into the production VM directly
+    { "action": "shell", "resource": "ssh *", "effect": "deny" },
+    { "action": "shell", "resource": "scp *", "effect": "deny" },
+    // never wipe the local database containers
+    { "action": "shell", "resource": "docker system prune*", "effect": "deny" },
+    { "action": "shell", "resource": "docker volume rm *", "effect": "deny" },
+
+    // ============================================================
+    // FILE READ
+    // ============================================================
+    // Project files: readable WITHOUT permission
+    { "action": "read", "resource": "*", "effect": "allow" },
+
+    // Secrets: reading requires permission
+    { "action": "read", "resource": "*.env", "effect": "ask" },
+    { "action": "read", "resource": "*.env.*", "effect": "ask" },
+    { "action": "read", "resource": ".env.prod", "effect": "ask" },
+    { "action": "read", "resource": ".env.staging", "effect": "ask" },
+    // but a committed example env is fine to read
+    { "action": "read", "resource": "*.env.example", "effect": "allow" },
+
+    // ============================================================
+    // FILE EDIT / WRITE / CREATE
+    // ============================================================
+    // Default: changing any file requires permission
+    { "action": "edit", "resource": "*", "effect": "ask" },
+
+    // --- Editable WITHOUT permission ---
+    // application source code
+    { "action": "edit", "resource": "src/**", "effect": "allow" },
+    // documentation / memory files
+    { "action": "edit", "resource": "*.md", "effect": "allow" },
+    { "action": "edit", "resource": "projectInfo/**", "effect": "allow" },
+    { "action": "edit", "resource": "project-memory/**", "effect": "allow" },
+    { "action": "edit", "resource": "projecthermesinfo/**", "effect": "allow" },
+
+    // --- Requires permission (ask, via default): pom.xml, Dockerfile,
+    //     docker-compose.yml, application.properties, build.sh, deploy.sh, .gitignore ---
+
+    // --- NEVER editable: environment files with live credentials ---
+    { "action": "edit", "resource": ".env.prod", "effect": "deny" },
+    { "action": "edit", "resource": ".env.staging", "effect": "deny" },
+    { "action": "edit", "resource": "*.env", "effect": "deny" },
+    { "action": "edit", "resource": "*.env.*", "effect": "deny" },
+    { "action": "edit", "resource": "*.env.example", "effect": "allow" },
+
+    // ============================================================
+    // OUTSIDE THIS PROJECT (external directories)
+    // ============================================================
+    // Accessing anything outside this project requires permission
+    { "action": "external_directory", "resource": "*", "effect": "ask" },
+
+    // Other projects in the workspace are STRICTLY OFF-LIMITS
+    { "action": "external_directory", "resource": "$HOME/Desktop/code/github/ADT-UI/*", "effect": "deny" },
+    { "action": "external_directory", "resource": "$HOME/Desktop/code/github/bleep_front_main/*", "effect": "deny" },
+    { "action": "external_directory", "resource": "$HOME/Desktop/code/github/bleep-talent-gateway-version2/*", "effect": "deny" },
+    { "action": "external_directory", "resource": "$HOME/Desktop/code/github/cse_Exam_prep/*", "effect": "deny" },
+    { "action": "external_directory", "resource": "$HOME/Desktop/code/github/opdRegistrationUI/*", "effect": "deny" },
+
+    // ============================================================
+    // WEB ACCESS
+    // ============================================================
+    // Doc/lookup sites: fetch WITHOUT permission
+    { "action": "webfetch", "resource": "https://opencode.ai/*", "effect": "allow" },
+    { "action": "webfetch", "resource": "https://spring.io/*", "effect": "allow" },
+    { "action": "webfetch", "resource": "https://docs.spring.io/*", "effect": "allow" },
+    { "action": "webfetch", "resource": "https://mvnrepository.com/*", "effect": "allow" },
+    { "action": "webfetch", "resource": "https://www.postgresql.org/*", "effect": "allow" },
+    { "action": "webfetch", "resource": "https://redis.io/*", "effect": "allow" },
+    // any other URL requires permission
+    { "action": "webfetch", "resource": "*", "effect": "ask" },
+    // web search allowed
+    { "action": "websearch", "resource": "*", "effect": "allow" }
+  ]
+}
