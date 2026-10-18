@@ -1,8 +1,10 @@
 {
   "$schema": "https://opencode.ai/config.json",
 
-  // Always load the project memory as instructions
-  "instructions": ["PROJECT_MEMORY.md"],
+  // Always load the project memory and session log as instructions.
+  // IMPORTANT: after finishing any work, add a new entry at the TOP of
+  // session/SESSION_LOG.md describing what was done and which files changed.
+  "instructions": ["PROJECT_MEMORY.md", "session/SESSION_LOG.md"],
 
   "permissions": [
     // ============================================================

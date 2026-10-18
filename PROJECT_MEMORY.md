@@ -97,7 +97,7 @@ src/main/resources/
 └── db/migration/V1__add_end_time_to_sessions.sql
 ```
 
-Root: `Dockerfile` (multi-stage, temurin-21, non-root), `docker-compose.yml`, `build.sh`, `deploy.sh`, `vmsetup.sh`, `.env.prod`, `.env.staging`, docs: `API_FLOW.md` (⚠️ outdated — describes JWT Bearer; actual auth is cookie+Redis), `PROJECT_STRUCTURE.md`, `sql-migrations.md`, `projectInfo/`, `project-memory/`.
+Root: `Dockerfile` (multi-stage, temurin-21, non-root), `docker-compose.yml`, `build.sh`, `deploy.sh`, `vmsetup.sh`, `.env.prod`, `.env.staging`, docs: `API_FLOW.md` (⚠️ outdated — describes JWT Bearer; actual auth is cookie+Redis), `PROJECT_STRUCTURE.md`, `sql-migrations.md`, `projectInfo/`, `project-memory/`. Meta files: `PROJECT_MEMORY.md` (this doc), `opencode.jsonc` (OpenCode permission config — auto-loaded as instructions), `session/SESSION_LOG.md` (work journal — one entry per session, newest first).
 
 ---
 
@@ -312,3 +312,5 @@ For each of `batches, courses, partners, partner-access-requests, sessions, stud
 4. Secrets committed in plaintext.
 5. Dashboard `activeEnrollments` is a placeholder; `MasterDataController` returns raw JPA entities (lazy relations may serialize oddly); `JwtService` + OAuth2 starters are dormant.
 6. `ddl-auto=update` in deployed envs (schema managed by Hibernate + Flyway deltas).
+7. **Antigravity IDE shows FALSE errors** on every Lombok `@RequiredArgsConstructor` class (`config/`, `controller/`, `dto/`, `entity/`, `event/`, `security/`, `service/` all go red): *"The Java feature 'Flexible Constructor Bodies' is only available with source level 25 and above."* This is a toolchain incompatibility — the IDE's Eclipse (ECJ) compiler + its bundled Lombok 1.18.39 agent generate Java-25-style constructors while this project compiles at Java 21. **Verified:** `mvn compile` is clean (exit 0); builds, Docker and deploys are unaffected. Fix: update the IDE's Java extension; do NOT "fix" the source code.
+8. Git: `pull.rebase=true` is set for this repo (Oct 19, 2026) — prevents the `fatal: Need to specify how to reconcile divergent branches` pull failure that blocked a push on Oct 19.
